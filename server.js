@@ -10,16 +10,17 @@ const path = require('path');
 const { exec } = require('child_process');
 
 // --- CONFIGURACIÓN DE CONEXIÓN ---
+// Soporta tanto local como Railway/Supabase
 
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost', // O la IP del servidor de la clínica
-  database: 'Consultorio',
-  password: 'Emanuel01112',
-  port: 5432,
-  max: 20, // Máximo de conexiones simultáneas
-  idleTimeoutMillis: 30000 
+  connectionString: process.env.DATABASE_URL || 'postgresql://postgres:Emanuel01112@localhost:5432/Consultorio',
+  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
+  max: 20,
+  idleTimeoutMillis: 30000
 });
+
+// Log para saber a qué BD nos conectamos (útil para depuración)
+console.log(`📊 Conectando a base de datos: ${process.env.DATABASE_URL ? 'REMOTA (Railway/Supabase)' : 'LOCAL (PostgreSQL)'}`);
 
 app.use(bodyParser.json());
 
@@ -1344,4 +1345,6 @@ app.get("/api/debug/turnos", async (req, res) => {
     }
 });
 
-app.listen(3000, () => console.log("🚀 Servidor profesional en http://localhost:3000"));
+// Puerto dinámico para Railway (usa el que asigna la nube)
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🚀 Servidor en http://localhost:${PORT}`));
