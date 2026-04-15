@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Planilla de Turnos - Panel Médico</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- SweetAlert2 CSS y JS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="plugins/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style2.css">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                        url('images/sl_021921_40900_13.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        .card-formulario {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 900px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            margin: 20px;
+        }
+
+        .title-color { color: #223a66; font-weight: 600; }
+        
+        .form-section {
+            background: rgba(34, 58, 102, 0.05);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #e12454;
+        }
+        
+        .form-section h5 {
+            color: #223a66;
+            font-size: 16px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .info-message {
+            background: #e9ecef;
+            border-radius: 10px;
+            padding: 10px 15px;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #495057;
+        }
+        
+        .info-message i {
+            color: #223a66;
+            margin-right: 8px;
+        }
+        
+        .alert-autocompletado {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 300px;
+        }
+        
+        .campo-opcional {
+            font-size: 11px;
+            color: #999;
+            font-weight: normal;
+            margin-left: 5px;
+        }
+
+/* Estilos para el buscador de pacientes */
+.sugerencias-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    margin-top: 5px;
+}
+
+.sugerencia-item {
+    padding: 12px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.2s ease;
+}
+
+.sugerencia-item:hover {
+    background: #f8f9fa;
+}
+
+.sugerencia-item:last-child {
+    border-bottom: none;
+}
+
+.sugerencia-nombre {
+    font-weight: 600;
+    color: #223a66;
+}
+
+.sugerencia-dni {
+    font-size: 12px;
+    color: #888;
+    margin-left: 8px;
+}
+
+.sugerencia-telefono {
+    font-size: 11px;
+    color: #e12454;
+    display: block;
+    margin-top: 4px;
+}
+
+.sugerencia-empty {
+    padding: 15px;
+    text-align: center;
+    color: #999;
+    font-size: 13px;
+}
+
+.input-group-custom {
+    position: relative;
+}
+
+    </style>
+</head>
+
+<body>
+
+    <div class="card-formulario">
+        <h2 class="title-color text-center mb-1">Planilla de Turnos</h2>
+        <p class="text-muted text-center mb-4">Complete los datos del paciente y el turno</p>
+        
+<!-- BUSCADOR DE PACIENTES EXISTENTES -->
+<div class="form-section" style="margin-bottom: 20px;">
+    <h5><i class="icofont-search"></i> Buscar Paciente Existente</h5>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="input-group-custom" style="position: relative;">
+                <input type="text" id="buscadorPaciente" class="input" autocomplete="off" placeholder="Buscar por nombre o DNI...">
+                <label class="user-label" for="buscadorPaciente">Buscar paciente</label>
+                <div id="sugerenciasPacientes" class="sugerencias-dropdown" style="display: none;"></div>
+            </div>
+            <small class="text-muted" style="font-size: 12px;">
+                <i class="icofont-info-circle"></i> Ingrese nombre o DNI para buscar pacientes existentes
+            </small>
+        </div>
+    </div>
+</div>
+
+        <form id="appointment-form">
+
+
+<!-- SECCIÓN: DATOS DEL PACIENTE (IDENTIFICACIÓN) -->
+<div class="form-section">
+    <h5><i class="icofont-id-card"></i> Identificación del Paciente</h5>
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="input-group-custom">
+                <input type="text" id="dni" required class="input" autocomplete="off">
+                <label class="user-label" for="dni">DNI / Identificación *</label>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="input-group-custom">
+                <input type="text" id="nombre" required class="input">
+                <label class="user-label" for="nombre">Nombre Completo *</label>
+            </div>
+        </div>
+    </div>
+</div>
+        <!-- SECCIÓN: DATOS DE CONTACTO -->
+<div class="form-section">
+    <h5><i class="icofont-phone"></i> Datos de Contacto</h5>
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="input-group-custom">
+                <input type="text" id="telefono" required class="input">
+                <label class="user-label" for="telefono">Teléfono / WhatsApp *</label>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="input-group-custom">
+                <input type="email" id="email" class="input">
+                <label class="user-label" for="email">Email <span class="campo-opcional">(opcional)</span></label>
+            </div>
+        </div>
+    </div>
+</div>
+
+         <!-- SECCIÓN: DATOS PERSONALES ADICIONALES -->
+<div class="form-section">
+    <h5><i class="icofont-user"></i> Datos Personales Adicionales</h5>
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="input-group-custom">
+                <input type="date" id="fecha_nacimiento" class="input">
+                <label class="user-label" for="fecha_nacimiento">Fecha de Nacimiento <span class="campo-opcional">(opcional)</span></label>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="input-group-custom">
+                <input type="text" id="direccion" class="input">
+                <label class="user-label" for="direccion">Dirección <span class="campo-opcional">(opcional)</span></label>
+            </div>
+        </div>
+    </div>
+</div>
+
+                    <!-- SECCIÓN: OBRA SOCIAL -->
+<div class="form-section">
+    <h5><i class="icofont-hospital"></i> Obra Social</h5>
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="input-group-custom">
+                <input type="text" id="obra_social" class="input">
+                <label class="user-label" for="obra_social">Obra Social <span class="campo-opcional">(opcional)</span></label>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="input-group-custom">
+                <input type="text" id="numero_afiliado" class="input">
+                <label class="user-label" for="numero_afiliado">Número de Afiliado <span class="campo-opcional">(opcional)</span></label>
+            </div>
+        </div>
+    </div>
+</div>
+            <!-- SECCIÓN: CONTACTO DE EMERGENCIA -->
+<div class="form-section">
+    <h5><i class="icofont-emergency"></i> Contacto de Emergencia</h5>
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="input-group-custom">
+                <input type="text" id="contacto_emergencia" class="input">
+                <label class="user-label" for="contacto_emergencia">Nombre Contacto <span class="campo-opcional">(opcional)</span></label>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="input-group-custom">
+                <input type="text" id="telefono_emergencia" class="input">
+                <label class="user-label" for="telefono_emergencia">Teléfono Emergencia <span class="campo-opcional">(opcional)</span></label>
+            </div>
+        </div>
+    </div>
+</div>
+            <!-- SECCIÓN: DATOS MÉDICOS -->
+<div class="form-section">
+    <h5><i class="icofont-medical"></i> Datos Médicos Relevantes</h5>
+    <div class="row">
+        <div class="col-lg-12 mb-4">
+            <div class="input-group-custom">
+                <textarea id="alergias" rows="2" class="input" style="height: auto;"></textarea>
+                <label class="user-label" for="alergias">Alergias <span class="campo-opcional">(medicamentos, alimentos, etc.)</span></label>
+            </div>
+        </div>
+
+        <div class="col-lg-12 mb-4">
+            <div class="input-group-custom">
+                <textarea id="antecedentes" rows="2" class="input" style="height: auto;"></textarea>
+                <label class="user-label" for="antecedentes">Antecedentes Médicos <span class="campo-opcional">(enfermedades crónicas, cirugías, etc.)</span></label>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- SECCIÓN: DATOS DEL TURNO -->
+<div class="form-section">
+    <h5><i class="icofont-calendar"></i> Datos del Turno</h5>
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="input-group-custom">
+                <select class="input" id="consultorio" required>
+                    <option value="" disabled selected hidden></option>
+                </select>
+                <label class="user-label" for="consultorio">Seleccionar Consultorio *</label>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="input-group-custom">
+                <select class="input" id="medico" required>
+                    <option value="" disabled selected hidden></option>
+                </select>
+                <label class="user-label" for="medico">Seleccionar Médico *</label>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="input-group-custom">
+                <input type="date" id="fecha" required class="input">
+                <label class="user-label" for="fecha">Fecha del Turno *</label>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="input-group-custom">
+                <input type="time" id="hora" required class="input">
+                <label class="user-label" for="hora">Hora del Turno *</label>
+            </div>
+        </div>
+
+        <div class="col-lg-12 mb-4">
+            <div class="input-group-custom">
+                <textarea id="mensaje" rows="2" class="input" style="height: auto;"></textarea>
+                <label class="user-label" for="mensaje">Motivo de consulta / Notas</label>
+            </div>
+        </div>
+    </div>
+</div>
+
+            <div class="info-message">
+                <i class="icofont-info-circle"></i> 
+                Los datos del paciente se guardarán en la base de datos y se autocompletarán automáticamente en futuros turnos.
+            </div>
+
+            <div class="btn-container d-flex gap-3 mt-4">
+                <button type="button" class="btn-hero3 btn-hero3-primary" onclick="guardarTurno()">
+                    Confirmar Turno
+                    <span></span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+
+                <button class="btn-hero3 btn-hero3-primary" onclick="window.location.href='index.html'">
+                    <i class="icofont-arrow-left"></i> Volver
+                    <span></span>
+                </button>
+            </div>
+        </form>
+    </div>
+<script>
+if (sessionStorage.getItem("logeado") !== "true") {
+    window.location.href = "login.html";
+}
+
+// ========== FUNCIONES DE VALIDACIÓN ==========
+
+// Validar DNI: solo números, máximo 8 caracteres
+function validarDNI(dni) {
+    const regex = /^\d{1,8}$/;
+    return regex.test(dni);
+}
+
+// Validar teléfono: solo números, mínimo 6, máximo 15 caracteres
+function validarTelefono(telefono) {
+    if (!telefono) return true;
+    const regex = /^\d{6,15}$/;
+    return regex.test(telefono);
+}
+
+// Validar email: formato básico
+function validarEmail(email) {
+    if (email === '') return true;
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+}
+
+// Validar nombre: solo letras, espacios y puntos, mínimo 3 caracteres
+function validarNombre(nombre) {
+    const regex = /^[a-zA-ZáéíóúñÑü\s\.]{3,100}$/;
+    return regex.test(nombre.trim());
+}
+
+function validarFechaTurno(fechaSeleccionada) {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const fechaTurno = new Date(fechaSeleccionada);
+    fechaTurno.setHours(0, 0, 0, 0);
+    return fechaTurno >= hoy;
+}
+
+// Limitar entrada a solo números
+function soloNumeros(event) {
+    const key = event.key;
+    if (!/^\d$/.test(key) && key !== 'Backspace' && key !== 'Tab' && key !== 'Delete' && key !== 'ArrowLeft' && key !== 'ArrowRight') {
+        event.preventDefault();
+    }
+}
+
+// Limitar longitud máxima
+function limitarLongitud(event, maxLength) {
+    const input = event.target;
+    if (input.value.length >= maxLength && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(event.key)) {
+        event.preventDefault();
+    }
+}
+
+// Formatear DNI (eliminar espacios y caracteres no numéricos)
+function formatearDNI(input) {
+    input.value = input.value.replace(/[^\d]/g, '').slice(0, 8);
+}
+
+// ========== CARGAR DATOS DINÁMICOS ==========
+function cargarMedicos() {
+    fetch("/medicos")
+        .then(res => res.json())
+        .then(data => {
+            const selectMedico = document.getElementById("medico");
+            if (selectMedico) {
+                selectMedico.innerHTML = '<option value="" disabled selected hidden>Seleccionar Médico</option>';
+                data.forEach(medico => {
+                    selectMedico.innerHTML += `<option value="${escapeHtml(medico.nombre)}">${escapeHtml(medico.nombre)}${medico.especialidad ? ' - ' + medico.especialidad : ''}</option>`;
+                });
+            }
+        })
+        .catch(err => console.error("Error cargando médicos:", err));
+}
+
+function cargarConsultorios() {
+    fetch("/consultorios")
+        .then(res => res.json())
+        .then(data => {
+            const selectConsultorio = document.getElementById("consultorio");
+            if (selectConsultorio) {
+                selectConsultorio.innerHTML = '<option value="" disabled selected hidden>Seleccionar Consultorio</option>';
+                data.forEach(consultorio => {
+                    selectConsultorio.innerHTML += `<option value="${escapeHtml(consultorio.nombre)}">${escapeHtml(consultorio.nombre)}${consultorio.ubicacion ? ' - ' + consultorio.ubicacion : ''}</option>`;
+                });
+            }
+        })
+        .catch(err => console.error("Error cargando consultorios:", err));
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function mostrarMensajeAutocompletado(mensaje) {
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        customClass: {
+            popup: 'rounded-3'
+        }
+    });
+    
+    Toast.fire({
+        icon: 'success',
+        title: mensaje
+    });
+}
+
+// Función para buscar paciente por DNI y autocompletar TODOS los campos
+let busquedaTimeout;
+function buscarPacientePorDNI() {
+    const dniInput = document.getElementById("dni");
+    const dni = dniInput.value.trim();
+    
+    if (dni.length >= 6) {
+        clearTimeout(busquedaTimeout);
+        busquedaTimeout = setTimeout(() => {
+            fetch(`/pacientes/${dni}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.nombre) {
+                        document.getElementById("nombre").value = data.nombre || '';
+                        document.getElementById("telefono").value = data.telefono || '';
+                        document.getElementById("email").value = data.email || '';
+                        document.getElementById("fecha_nacimiento").value = data.fecha_nacimiento || '';
+                        document.getElementById("direccion").value = data.direccion || '';
+                        document.getElementById("obra_social").value = data.obra_social || '';
+                        document.getElementById("numero_afiliado").value = data.numero_afiliado || '';
+                        document.getElementById("contacto_emergencia").value = data.contacto_emergencia || '';
+                        document.getElementById("telefono_emergencia").value = data.telefono_emergencia || '';
+                        document.getElementById("alergias").value = data.alergias || '';
+                        document.getElementById("antecedentes").value = data.antecedentes || '';
+                        
+                        mostrarMensajeAutocompletado("Paciente encontrado. Datos cargados automáticamente.");
+                    }
+                })
+                .catch(err => console.error("Error buscando paciente:", err));
+        }, 500);
+    }
+}
+
+// Función para validar que la fecha no sea anterior a hoy
+function validarFechaTurno(fechaSeleccionada) {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    
+    const fechaTurno = new Date(fechaSeleccionada);
+    fechaTurno.setHours(0, 0, 0, 0);
+    
+    return fechaTurno >= hoy;
+}
+
+//verificarDisponibilidadTurno
+// ========== FUNCIÓN PARA VERIFICAR DISPONIBILIDAD ==========
+function verificarDisponibilidadTurno(fecha, hora, medico, datosTurno, datosPaciente) {
+    // Mostrar loading
+    Swal.fire({
+        title: 'Verificando disponibilidad...',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+    
+    fetch(`/verificar-turno?fecha=${fecha}&hora=${hora}&medico=${encodeURIComponent(medico)}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.disponible) {
+                // Disponible - proceder a guardar
+                enviarTurno(datosTurno, datosPaciente);
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Horario no disponible',
+                    text: `El Dr. ${medico} ya tiene un turno asignado para el día ${fecha} a las ${hora}. Por favor, seleccione otro horario.`,
+                    confirmButtonText: 'Entendido',
+                    customClass: {
+                        confirmButton: 'btn btn-main'
+                    },
+                    buttonsStyling: false
+                });
+            }
+        })
+        .catch(err => {
+            console.error("Error al verificar disponibilidad:", err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de conexión',
+                text: 'No se pudo verificar la disponibilidad. Intente nuevamente.',
+                confirmButtonText: 'Entendido'
+            });
+        });
+}
+
+// ========== FUNCIÓN PARA ENVIAR TURNO (VERSIÓN CORREGIDA) ==========
+function enviarTurno(datosTurno, datosPaciente) {
+    console.log("📤 Enviando turno al servidor...");
+    console.log("Datos del turno:", datosTurno);
+    console.log("Datos del paciente:", datosPaciente);
+    
+    // Primero guardar el paciente
+    fetch("/pacientes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(datosPaciente)
+    })
+    .then(res => res.json())
+    .then(pacienteData => {
+        console.log("📥 Respuesta paciente:", pacienteData);
+        
+        if (pacienteData.success) {
+            // Paciente guardado, ahora guardar el turno
+            return fetch("/guardar-turno", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(datosTurno)
+            });
+        } else {
+            throw new Error(pacienteData.error || "Error al guardar paciente");
+        }
+    })
+    .then(res => res.json())
+    .then(turnoData => {
+        console.log("📥 Respuesta del servidor (turno):", turnoData);
+        
+        if (turnoData.error) {
+            throw new Error(turnoData.error);
+        }
+        
+        // Verificar que tenemos el turnoId
+        if (!turnoData.turnoId) {
+            console.error("❌ ERROR: No se recibió turnoId del servidor");
+            Swal.fire({
+                icon: 'warning',
+                title: 'Atención',
+                text: 'El turno se guardó pero no se obtuvo el ID. La función de WhatsApp podría no funcionar.',
+                timer: 3000,
+                showConfirmButton: false
+            });
+        } else {
+            console.log("✅ Turno ID recibido:", turnoData.turnoId);
+        }
+        
+        Swal.fire({
+            icon: 'success',
+            title: '¡Turno guardado!',
+            text: 'El turno ha sido registrado exitosamente',
+            timer: 2000,
+            showConfirmButton: false
+        }).then(() => {
+            // Crear objeto completo con ID
+            const turnoCompleto = { 
+                ...datosTurno, 
+                ...datosPaciente, 
+                id: turnoData.turnoId 
+            };
+            
+            localStorage.setItem("turno", JSON.stringify(turnoCompleto));
+            
+            if (turnoData.turnoId) {
+                localStorage.setItem("turnoId", turnoData.turnoId.toString());
+                console.log("💾 Turno ID guardado en localStorage:", turnoData.turnoId);
+            } else {
+                // Si no hay ID, guardar un valor temporal
+                const tempId = "temp_" + Date.now();
+                localStorage.setItem("turnoId", tempId);
+                console.log("⚠️ ID temporal guardado:", tempId);
+            }
+            
+            window.location.href = "confirmation.html";
+        });
+    })
+    .catch(err => {
+        console.error("❌ Error en el proceso:", err);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: err.message || 'Error al guardar el turno',
+            confirmButtonText: 'Entendido'
+        });
+    });
+}
+
+// ========== FUNCIÓN PRINCIPAL GUARDAR TURNO ==========
+function guardarTurno() {
+    // Obtener valores del formulario
+    const consultorio = document.getElementById("consultorio").value;
+    const medico = document.getElementById("medico").value;
+    const fecha = document.getElementById("fecha").value;
+    const hora = document.getElementById("hora").value;
+    const mensaje = document.getElementById("mensaje").value;
+    
+    const dni = document.getElementById("dni").value;
+    const nombre = document.getElementById("nombre").value;
+    const telefono = document.getElementById("telefono").value;
+    const email = document.getElementById("email").value;
+    const fecha_nacimiento = document.getElementById("fecha_nacimiento").value;
+    const direccion = document.getElementById("direccion").value;
+    const obra_social = document.getElementById("obra_social").value;
+    const numero_afiliado = document.getElementById("numero_afiliado").value;
+    const contacto_emergencia = document.getElementById("contacto_emergencia").value;
+    const telefono_emergencia = document.getElementById("telefono_emergencia").value;
+    const alergias = document.getElementById("alergias").value;
+    const antecedentes = document.getElementById("antecedentes").value;
+
+    // Validaciones con SweetAlert
+    if (!nombre || !fecha || !hora || !dni) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Campos incompletos',
+            text: 'Por favor, complete los campos obligatorios (Nombre, DNI, Fecha y Hora)',
+            confirmButtonText: 'Entendido',
+            customClass: {
+                confirmButton: 'btn btn-main'
+            },
+            buttonsStyling: false
+        });
+        return;
+    }
+
+    if (!validarDNI(dni)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'DNI inválido',
+            text: 'El DNI debe contener solo números y máximo 8 dígitos',
+            confirmButtonText: 'Corregir',
+            customClass: {
+                confirmButton: 'btn btn-main'
+            },
+            buttonsStyling: false
+        });
+        document.getElementById("dni").focus();
+        return;
+    }
+
+    if (!validarNombre(nombre)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Nombre inválido',
+            text: 'El nombre debe tener al menos 3 caracteres y solo letras',
+            confirmButtonText: 'Corregir',
+            customClass: {
+                confirmButton: 'btn btn-main'
+            },
+            buttonsStyling: false
+        });
+        document.getElementById("nombre").focus();
+        return;
+    }
+
+    if (!validarTelefono(telefono)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Teléfono inválido',
+            text: 'El teléfono debe contener solo números (mínimo 6, máximo 15 dígitos)',
+            confirmButtonText: 'Corregir',
+            customClass: {
+                confirmButton: 'btn btn-main'
+            },
+            buttonsStyling: false
+        });
+        document.getElementById("telefono").focus();
+        return;
+    }
+
+    if (email && !validarEmail(email)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Email inválido',
+            text: 'Por favor, ingrese un email válido (ejemplo: usuario@dominio.com)',
+            confirmButtonText: 'Corregir',
+            customClass: {
+                confirmButton: 'btn btn-main'
+            },
+            buttonsStyling: false
+        });
+        document.getElementById("email").focus();
+        return;
+    }
+
+    if (!consultorio) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Seleccione consultorio',
+            text: 'Por favor, seleccione un consultorio',
+            confirmButtonText: 'Entendido',
+            customClass: {
+                confirmButton: 'btn btn-main'
+            },
+            buttonsStyling: false
+        });
+        return;
+    }
+
+    if (!medico) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Seleccione médico',
+            text: 'Por favor, seleccione un médico',
+            confirmButtonText: 'Entendido',
+            customClass: {
+                confirmButton: 'btn btn-main'
+            },
+            buttonsStyling: false
+        });
+        return;
+    }
+
+    if (!validarFechaTurno(fecha)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Fecha inválida',
+            text: 'No se pueden asignar turnos en fechas anteriores al día de hoy',
+            confirmButtonText: 'Corregir',
+            customClass: {
+                confirmButton: 'btn btn-main'
+            },
+            buttonsStyling: false
+        });
+        return;
+    }
+
+    // Preparar datos del turno
+    const datosTurno = {
+        consultorio: consultorio,
+        medico: medico,
+        nombre: nombre,
+        dni: dni,
+        telefono: telefono,
+        fecha: fecha,
+        hora: hora,
+        mensaje: mensaje
+    };
+
+    // Preparar datos del paciente
+    const datosPaciente = {
+        dni: dni,
+        nombre: nombre,
+        telefono: telefono,
+        email: email,
+        fecha_nacimiento: fecha_nacimiento,
+        direccion: direccion,
+        obra_social: obra_social,
+        numero_afiliado: numero_afiliado,
+        contacto_emergencia: contacto_emergencia,
+        telefono_emergencia: telefono_emergencia,
+        alergias: alergias,
+        antecedentes: antecedentes
+    };
+
+    // Verificar disponibilidad antes de guardar
+    verificarDisponibilidadTurno(fecha, hora, medico, datosTurno, datosPaciente);
+}
+// ========== BUSCADOR DE PACIENTES EN TIEMPO REAL ==========
+let busquedaTimeoutPaciente;
+
+function buscarPacientes(termino) {
+    if (termino.length < 2) {
+        document.getElementById("sugerenciasPacientes").style.display = "none";
+        return;
+    }
+    
+    fetch(`/pacientes/buscar/${encodeURIComponent(termino)}`)
+        .then(res => res.json())
+        .then(data => {
+            const sugerenciasDiv = document.getElementById("sugerenciasPacientes");
+            
+            if (data.length === 0) {
+                sugerenciasDiv.innerHTML = '<div class="sugerencia-empty"><i class="icofont-info-circle"></i> No se encontraron pacientes</div>';
+                sugerenciasDiv.style.display = "block";
+                return;
+            }
+            
+            sugerenciasDiv.innerHTML = data.map(paciente => `
+                <div class="sugerencia-item" onclick="seleccionarPaciente(${JSON.stringify(paciente).replace(/"/g, '&quot;')})">
+                    <div>
+                        <span class="sugerencia-nombre">${escapeHtml(paciente.nombre)}</span>
+                        <span class="sugerencia-dni">DNI: ${paciente.dni}</span>
+                    </div>
+                    ${paciente.telefono ? `<div class="sugerencia-telefono"><i class="icofont-phone"></i> ${paciente.telefono}</div>` : ''}
+                </div>
+            `).join('');
+            sugerenciasDiv.style.display = "block";
+        })
+        .catch(err => console.error("Error buscando pacientes:", err));
+}
+
+function seleccionarPaciente(paciente) {
+    document.getElementById("dni").value = paciente.dni;
+    document.getElementById("nombre").value = paciente.nombre || '';
+    document.getElementById("telefono").value = paciente.telefono || '';
+    document.getElementById("email").value = paciente.email || '';
+    document.getElementById("fecha_nacimiento").value = paciente.fecha_nacimiento || '';
+    document.getElementById("direccion").value = paciente.direccion || '';
+    document.getElementById("obra_social").value = paciente.obra_social || '';
+    document.getElementById("numero_afiliado").value = paciente.numero_afiliado || '';
+    document.getElementById("contacto_emergencia").value = paciente.contacto_emergencia || '';
+    document.getElementById("telefono_emergencia").value = paciente.telefono_emergencia || '';
+    document.getElementById("alergias").value = paciente.alergias || '';
+    document.getElementById("antecedentes").value = paciente.antecedentes || '';
+    
+    document.getElementById("sugerenciasPacientes").style.display = "none";
+    mostrarMensajeAutocompletado(`Paciente "${paciente.nombre}" cargado. Complete los datos del turno.`);
+    document.getElementById("fecha").focus();
+}
+
+// Cerrar sugerencias al hacer clic fuera
+document.addEventListener("click", function(e) {
+    const buscador = document.getElementById("buscadorPaciente");
+    const sugerencias = document.getElementById("sugerenciasPacientes");
+    if (buscador && sugerencias && !buscador.contains(e.target) && !sugerencias.contains(e.target)) {
+        sugerencias.style.display = "none";
+    }
+});
+
+// ========== CONFIGURACIÓN AL CARGAR LA PÁGINA ==========
+document.addEventListener("DOMContentLoaded", function() {
+    cargarMedicos();
+    cargarConsultorios();
+    
+    // Campo DNI - Validación en tiempo real
+    const dniInput = document.getElementById("dni");
+    if (dniInput) {
+        dniInput.addEventListener("keypress", soloNumeros);
+        dniInput.addEventListener("keydown", function(e) {
+            if (this.value.length >= 8 && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
+                e.preventDefault();
+            }
+        });
+        dniInput.addEventListener("input", function() {
+            formatearDNI(this);
+        });
+        dniInput.addEventListener("blur", function() {
+            if (this.value && !validarDNI(this.value)) {
+                alert("El DNI debe contener solo números y máximo 8 dígitos");
+                this.value = "";
+                this.focus();
+            } else if (this.value) {
+                buscarPacientePorDNI();
+            }
+        });
+    }
+    
+    // Campo Teléfono
+    const telefonoInput = document.getElementById("telefono");
+    if (telefonoInput) {
+        telefonoInput.addEventListener("keypress", soloNumeros);
+        telefonoInput.addEventListener("blur", function() {
+            if (this.value && !validarTelefono(this.value)) {
+                alert("El teléfono debe contener solo números (mínimo 6, máximo 15 dígitos)");
+                this.value = "";
+                this.focus();
+            }
+        });
+    }
+    
+    // Campo Nombre
+    const nombreInput = document.getElementById("nombre");
+    if (nombreInput) {
+        nombreInput.addEventListener("blur", function() {
+            if (this.value && !validarNombre(this.value)) {
+                alert("El nombre debe tener al menos 3 caracteres y solo letras");
+                this.value = "";
+                this.focus();
+            }
+        });
+    }
+    
+    // Campo Email
+    const emailInput = document.getElementById("email");
+    if (emailInput) {
+        emailInput.addEventListener("blur", function() {
+            if (this.value && !validarEmail(this.value)) {
+                alert("Por favor, ingrese un email válido (ejemplo: usuario@dominio.com)");
+                this.value = "";
+                this.focus();
+            }
+        });
+    }
+    
+    // Campo Teléfono Emergencia
+    const telefonoEmergenciaInput = document.getElementById("telefono_emergencia");
+    if (telefonoEmergenciaInput) {
+        telefonoEmergenciaInput.addEventListener("keypress", soloNumeros);
+        telefonoEmergenciaInput.addEventListener("blur", function() {
+            if (this.value && !validarTelefono(this.value)) {
+                alert("El teléfono de emergencia debe contener solo números (mínimo 6, máximo 15 dígitos)");
+                this.value = "";
+            }
+        });
+    }
+    
+    // Buscador de pacientes
+    const buscadorPaciente = document.getElementById("buscadorPaciente");
+    if (buscadorPaciente) {
+        buscadorPaciente.addEventListener("input", function(e) {
+            clearTimeout(busquedaTimeoutPaciente);
+            const termino = e.target.value.trim();
+            busquedaTimeoutPaciente = setTimeout(() => {
+                buscarPacientes(termino);
+            }, 300);
+        });
+        
+        buscadorPaciente.addEventListener("focus", function() {
+            if (this.value.length >= 2) {
+                buscarPacientes(this.value);
+            }
+        });
+    }
+    
+    // Campo Fecha
+    const inputFecha = document.getElementById("fecha");
+    if (inputFecha) {
+        const hoy = new Date();
+        const anio = hoy.getFullYear();
+        const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+        const dia = String(hoy.getDate()).padStart(2, '0');
+        const fechaMinima = `${anio}-${mes}-${dia}`;
+        inputFecha.setAttribute("min", fechaMinima);
+        console.log("Fecha mínima establecida:", fechaMinima);
+
+        // QUITAR CUALQUIER RESTRICCIÓN DE MAX
+    inputFecha.removeAttribute("max");
+    
+    console.log("Fecha mínima:", fechaMinima);
+    console.log("Fecha seleccionable:", inputFecha.min);
+    
+    // FORZAR que hoy sea seleccionable
+    inputFecha.value = fechaMinima;
+
+    }
+});
+
+</script>
+</body>
+</html>

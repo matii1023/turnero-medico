@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Gestión de Pacientes - Consultorio Médico</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="plugins/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="plugins/icofont/icofont.min.css">
+    <!-- SweetAlert2 CSS y JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style2.css">
+    <style>
+        :root { --primary-color: #223a66; --accent-color: #e12454; }
+        
+        .page-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1a2c4e 100%);
+            padding: 30px 0;
+            margin-bottom: 40px;
+            border-radius: 0 0 20px 20px;
+            color: white;
+        }
+        
+        .page-header h2 {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .page-header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+        }
+        
+        .search-container {
+            max-width: 500px;
+            margin: 0 auto 30px;
+        }
+        
+        .search-container .form-control {
+            border-radius: 50px;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+        
+        .search-container .form-control:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(225, 36, 84, 0.1);
+        }
+        
+        .pacientes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+        
+        .paciente-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .paciente-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+        }
+        
+        .paciente-card.expanded {
+            grid-column: span 2;
+        }
+        
+        .paciente-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #2c4a7a 100%);
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .paciente-header h5 {
+            margin: 0;
+            color: white;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .paciente-header h5 i {
+            font-size: 24px;
+        }
+        
+        .badge-dni {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: normal;
+        }
+        
+        .paciente-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-icon {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .btn-icon:hover {
+            background: var(--accent-color);
+            transform: scale(1.02);
+        }
+        
+        .btn-icon.danger:hover {
+            background: #dc3545;
+        }
+        
+        .paciente-body {
+            padding: 20px;
+            display: none;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .paciente-body.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .info-section {
+            margin-bottom: 20px;
+        }
+        
+        .info-section h6 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid var(--accent-color);
+            display: inline-block;
+        }
+        
+        .info-row {
+            display: flex;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .info-label {
+            width: 130px;
+            font-weight: 600;
+            color: #555;
+            font-size: 13px;
+        }
+        
+        .info-value {
+            flex: 1;
+            color: #333;
+            font-size: 13px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #999;
+        }
+        
+        .empty-state i {
+            font-size: 80px;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+        
+        .modal-custom .modal-header {
+            background: var(--primary-color);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+        
+        .modal-custom .modal-header .close {
+            color: white;
+            opacity: 0.8;
+        }
+        
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .form-section h6 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .btn-nuevo-paciente {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .btn-nuevo-paciente:hover {
+            background: var(--primary-color);
+            transform: scale(1.02);
+        }
+        
+        .stats-bar {
+            background: white;
+            border-radius: 15px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .stats-item {
+            text-align: center;
+        }
+        
+        .stats-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .stats-label {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            .pacientes-grid {
+                grid-template-columns: 1fr;
+            }
+            .paciente-card.expanded {
+                grid-column: span 1;
+            }
+            .info-label {
+                width: 100%;
+                margin-bottom: 4px;
+            }
+        }
+
+        /* Estilos SweetAlert */
+        .swal2-popup {
+            border-radius: 20px !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+        
+        .swal2-title {
+            color: #223a66 !important;
+            font-weight: 600 !important;
+        }
+        
+        .swal2-confirm.btn-main {
+            background: #223a66 !important;
+            color: white !important;
+            border: none !important;
+            padding: 10px 25px !important;
+            border-radius: 8px !important;
+            font-weight: 500 !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .swal2-confirm.btn-main:hover {
+            background: #e12454 !important;
+            transform: scale(1.02) !important;
+        }
+        
+        .swal2-cancel.btn-secondary {
+            background: #6c757d !important;
+            color: white !important;
+            border: none !important;
+            padding: 10px 25px !important;
+            border-radius: 8px !important;
+            font-weight: 500 !important;
+        }
+        
+        .swal2-cancel.btn-secondary:hover {
+            background: #5a6268 !important;
+        }
+        
+        .swal2-confirm.btn-danger {
+            background: #dc3545 !important;
+            color: white !important;
+        }
+        
+        .swal2-confirm.btn-danger:hover {
+            background: #c82333 !important;
+        }
+    </style>
+</head>
+<body class="gray-bg">
+
+    <nav class="navbar navbar-expand-lg navigation mb-4">
+        <div class="container-fluid px-5">
+            <a class="navbar-brand" href="index.html">
+                <img src="images/logo.png" alt="Logo" style="max-height: 40px;">
+            </a>
+            <div class="collapse navbar-collapse" id="navbarmain">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="agenda.html">Agenda</a></li>
+                    <li class="nav-item"><a class="nav-link" href="historia.html">Historia Clínica</a></li>
+                    <li class="nav-item"><a class="nav-link" href="gestion_historias.html">Gestión HC</a></li>
+                    <li class="nav-item active"><a class="nav-link" href="pacientes.html">Pacientes</a></li>
+                    <li class="nav-item"><a class="nav-link" href="admin.html">Administración</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <div class="container text-center">
+            <h2><i class="icofont-users-alt-2"></i> Gestión de Pacientes</h2>
+            <p>Administre los datos demográficos de todos los pacientes</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="stats-bar" id="statsBar" style="display: none;">
+            <div class="stats-item">
+                <div class="stats-number" id="totalPacientes">0</div>
+                <div class="stats-label">Total Pacientes</div>
+            </div>
+            <div class="stats-item">
+                <div class="stats-number" id="conTurnosActivos">0</div>
+                <div class="stats-label">Con Turnos Activos</div>
+            </div>
+            <div class="stats-item">
+                <div class="stats-number" id="conHistoriaClinica">0</div>
+                <div class="stats-label">Con Historia Clínica</div>
+            </div>
+            <button class="btn-nuevo-paciente" onclick="mostrarModalNuevoPaciente()">
+                <i class="icofont-plus"></i> Nuevo Paciente
+            </button>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="buscador" class="form-control" placeholder="🔍 Buscar por nombre, DNI o teléfono...">
+        </div>
+
+        <div id="pacientesGrid" class="pacientes-grid">
+            <div class="empty-state">
+                <i class="icofont-users-alt-2"></i>
+                <p>Cargando pacientes...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para editar/crear paciente -->
+    <div class="modal fade modal-custom" id="modalPaciente" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalPacienteTitle">
+                        <i class="icofont-user"></i> Nuevo Paciente
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="pacienteId">
+                    
+                    <div class="form-section">
+                        <h6><i class="icofont-id-card"></i> Datos Personales</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label>DNI *</label>
+                                <input type="text" id="pacienteDni" class="form-control" placeholder="12345678">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>Nombre Completo *</label>
+                                <input type="text" id="pacienteNombre" class="form-control" placeholder="Juan Pérez">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>Teléfono</label>
+                                <input type="text" id="pacienteTelefono" class="form-control" placeholder="123456789">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>Email</label>
+                                <input type="email" id="pacienteEmail" class="form-control" placeholder="correo@ejemplo.com">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>Fecha de Nacimiento</label>
+                                <input type="date" id="pacienteFechaNacimiento" class="form-control">
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label>Dirección</label>
+                                <input type="text" id="pacienteDireccion" class="form-control" placeholder="Calle, número, ciudad">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h6><i class="icofont-hospital"></i> Obra Social</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label>Obra Social</label>
+                                <input type="text" id="pacienteObraSocial" class="form-control" placeholder="OSDE, Swiss Medical, etc.">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>Número de Afiliado</label>
+                                <input type="text" id="pacienteNumeroAfiliado" class="form-control" placeholder="123456789">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h6><i class="icofont-phone"></i> Contacto de Emergencia</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label>Nombre Contacto</label>
+                                <input type="text" id="pacienteContactoEmergencia" class="form-control" placeholder="Nombre de familiar">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>Teléfono Emergencia</label>
+                                <input type="text" id="pacienteTelefonoEmergencia" class="form-control" placeholder="Teléfono de emergencia">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h6><i class="icofont-medical"></i> Datos Médicos</h6>
+                        <div class="mb-3">
+                            <label>Alergias</label>
+                            <textarea id="pacienteAlergias" class="form-control" rows="2" placeholder="Medicamentos, alimentos, etc."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label>Antecedentes Médicos</label>
+                            <textarea id="pacienteAntecedentes" class="form-control" rows="3" placeholder="Enfermedades crónicas, cirugías, tratamientos actuales..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="icofont-close"></i> Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="guardarPaciente()">
+                        <i class="icofont-save"></i> Guardar Paciente
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para eliminar -->
+    <div class="modal fade" id="modalConfirmarEliminar" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="icofont-warning"></i> Confirmar Eliminación
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Está seguro de que desea eliminar este paciente?</p>
+                    <p class="text-danger"><small>Esta acción no se puede deshacer. Si el paciente tiene turnos activos, no podrá ser eliminado.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="btnConfirmarEliminar">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <script>
+        if (sessionStorage.getItem("logeado") !== "true") {
+            window.location.href = "login.html";
+        }
+
+        let pacientesOriginales = [];
+        let pacienteAEliminar = null;
+
+        // ========== FUNCIONES DE VALIDACIÓN ==========
+
+        function validarDNI(dni) {
+            const regex = /^\d{1,8}$/;
+            return regex.test(dni);
+        }
+
+        function validarTelefono(telefono) {
+            if (!telefono) return true;
+            const regex = /^\d{6,15}$/;
+            return regex.test(telefono);
+        }
+
+        function validarEmail(email) {
+            if (!email) return true;
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(email);
+        }
+
+        function validarNombre(nombre) {
+            const regex = /^[a-zA-ZáéíóúñÑü\s\.]{3,100}$/;
+            return regex.test(nombre.trim());
+        }
+
+        function soloNumeros(event) {
+            const key = event.key;
+            if (!/^\d$/.test(key) && key !== 'Backspace' && key !== 'Tab' && key !== 'Delete' && key !== 'ArrowLeft' && key !== 'ArrowRight') {
+                event.preventDefault();
+            }
+        }
+
+        function formatearDNI(input) {
+            input.value = input.value.replace(/[^\d]/g, '').slice(0, 8);
+        }
+
+        // ========== FUNCIONES PRINCIPALES ==========
+        function cargarPacientes() {
+            fetch("/pacientes")
+                .then(res => res.json())
+                .then(data => {
+                    pacientesOriginales = data;
+                    renderizarPacientes(data);
+                    actualizarEstadisticas(data);
+                })
+                .catch(err => {
+                    console.error("Error cargando pacientes:", err);
+                    document.getElementById("pacientesGrid").innerHTML = `
+                        <div class="empty-state">
+                            <i class="icofont-warning"></i>
+                            <p>Error al cargar pacientes: ${err.message}</p>
+                        </div>
+                    `;
+                });
+        }
+
+        function actualizarEstadisticas(pacientes) {
+            const total = pacientes.length;
+            
+            fetch("/turnos")
+                .then(res => res.json())
+                .then(turnos => {
+                    const turnosActivos = turnos.filter(t => t.fecha >= new Date().toISOString().split('T')[0]);
+                    const pacientesConTurnos = new Set(turnosActivos.map(t => t.dni)).size;
+                    document.getElementById("conTurnosActivos").innerText = pacientesConTurnos;
+                });
+            
+            Promise.all(pacientes.map(p => fetch(`/historia/${p.dni}`).then(res => res.json())))
+                .then(historias => {
+                    const conHistoria = historias.filter(h => h.length > 0).length;
+                    document.getElementById("conHistoriaClinica").innerText = conHistoria;
+                });
+            
+            document.getElementById("totalPacientes").innerText = total;
+            document.getElementById("statsBar").style.display = total > 0 ? "block" : "none";
+        }
+
+        function renderizarPacientes(pacientes) {
+            const grid = document.getElementById("pacientesGrid");
+            
+            if (pacientes.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="icofont-users-alt-2"></i>
+                        <p>No hay pacientes registrados</p>
+                        <button class="btn-nuevo-paciente" onclick="mostrarModalNuevoPaciente()">
+                            <i class="icofont-plus"></i> Agregar primer paciente
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = pacientes.map(paciente => `
+                <div class="paciente-card" data-id="${paciente.id}">
+                    <div class="paciente-header" onclick="toggleExpand(this.parentElement)">
+                        <h5>
+                            <i class="icofont-user"></i>
+                            ${escapeHtml(paciente.nombre)}
+                            <span class="badge-dni">DNI: ${paciente.dni}</span>
+                        </h5>
+                        <div class="paciente-actions" onclick="event.stopPropagation()">
+                            <button class="btn-icon" onclick="editarPaciente(${paciente.id})" title="Editar">
+                                <i class="icofont-edit"></i> Editar
+                            </button>
+                            <button class="btn-icon danger" onclick="confirmarEliminarPaciente(${paciente.id}, '${escapeHtml(paciente.nombre)}')" title="Eliminar">
+                                <i class="icofont-trash"></i> Eliminar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="paciente-body">
+                        <div class="info-section">
+                            <h6><i class="icofont-id-card"></i> Datos Personales</h6>
+                            <div class="info-row">
+                                <div class="info-label">DNI:</div>
+                                <div class="info-value">${paciente.dni}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Teléfono:</div>
+                                <div class="info-value">${paciente.telefono || 'No registrado'}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Email:</div>
+                                <div class="info-value">${paciente.email || 'No registrado'}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Fecha Nacimiento:</div>
+                                <div class="info-value">${paciente.fecha_nacimiento ? formatearFecha(paciente.fecha_nacimiento) : 'No registrada'}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Dirección:</div>
+                                <div class="info-value">${paciente.direccion || 'No registrada'}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-section">
+                            <h6><i class="icofont-hospital"></i> Obra Social</h6>
+                            <div class="info-row">
+                                <div class="info-label">Obra Social:</div>
+                                <div class="info-value">${paciente.obra_social || 'No registrada'}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">N° Afiliado:</div>
+                                <div class="info-value">${paciente.numero_afiliado || 'No registrado'}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-section">
+                            <h6><i class="icofont-phone"></i> Contacto de Emergencia</h6>
+                            <div class="info-row">
+                                <div class="info-label">Contacto:</div>
+                                <div class="info-value">${paciente.contacto_emergencia || 'No registrado'}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Teléfono:</div>
+                                <div class="info-value">${paciente.telefono_emergencia || 'No registrado'}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-section">
+                            <h6><i class="icofont-medical"></i> Datos Médicos</h6>
+                            <div class="info-row">
+                                <div class="info-label">Alergias:</div>
+                                <div class="info-value">${paciente.alergias || 'No registradas'}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Antecedentes:</div>
+                                <div class="info-value">${paciente.antecedentes || 'No registrados'}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-3">
+                            <a href="historia.html?dni=${paciente.dni}" class="btn btn-sm btn-primary">
+                                <i class="icofont-medical-record"></i> Ver Historia Clínica
+                            </a>
+                            <a href="appoinment.html" class="btn btn-sm btn-success">
+                                <i class="icofont-calendar"></i> Nuevo Turno
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleExpand(card) {
+            const body = card.querySelector('.paciente-body');
+            body.classList.toggle('show');
+            if (body.classList.contains('show')) {
+                card.classList.add('expanded');
+            } else {
+                card.classList.remove('expanded');
+            }
+        }
+
+        function formatearFecha(fechaISO) {
+            if (!fechaISO) return 'N/A';
+            const parteFecha = fechaISO.split('T')[0];
+            const [anio, mes, dia] = parteFecha.split('-');
+            return `${dia}/${mes}/${anio}`;
+        }
+
+        function formatearFechaParaInput(fechaISO) {
+            if (!fechaISO) return '';
+            const parteFecha = fechaISO.split('T')[0];
+            return parteFecha;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ========== CONFIGURAR VALIDACIONES DEL MODAL ==========
+        function configurarValidacionesModal() {
+            const dniInput = document.getElementById("pacienteDni");
+            if (dniInput) {
+                dniInput.removeEventListener("keypress", soloNumeros);
+                dniInput.removeEventListener("input", () => formatearDNI(dniInput));
+                dniInput.removeEventListener("blur", handleDniBlur);
+                
+                dniInput.addEventListener("keypress", soloNumeros);
+                dniInput.addEventListener("input", function() { formatearDNI(this); });
+                dniInput.addEventListener("blur", handleDniBlur);
+            }
+            
+            const telefonoInput = document.getElementById("pacienteTelefono");
+            if (telefonoInput) {
+                telefonoInput.removeEventListener("keypress", soloNumeros);
+                telefonoInput.removeEventListener("blur", handleTelefonoBlur);
+                telefonoInput.addEventListener("keypress", soloNumeros);
+                telefonoInput.addEventListener("blur", handleTelefonoBlur);
+            }
+            
+            const telefonoEmergencia = document.getElementById("pacienteTelefonoEmergencia");
+            if (telefonoEmergencia) {
+                telefonoEmergencia.removeEventListener("keypress", soloNumeros);
+                telefonoEmergencia.removeEventListener("blur", handleTelefonoEmergenciaBlur);
+                telefonoEmergencia.addEventListener("keypress", soloNumeros);
+                telefonoEmergencia.addEventListener("blur", handleTelefonoEmergenciaBlur);
+            }
+            
+            const emailInput = document.getElementById("pacienteEmail");
+            if (emailInput) {
+                emailInput.removeEventListener("blur", handleEmailBlur);
+                emailInput.addEventListener("blur", handleEmailBlur);
+            }
+            
+            const nombreInput = document.getElementById("pacienteNombre");
+            if (nombreInput) {
+                nombreInput.removeEventListener("blur", handleNombreBlur);
+                nombreInput.addEventListener("blur", handleNombreBlur);
+            }
+        }
+
+        function handleDniBlur() {
+            const input = this;
+            if (input.value && !validarDNI(input.value)) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'DNI inválido',
+                    text: 'El DNI debe contener solo números y máximo 8 dígitos',
+                    confirmButtonText: 'Entendido',
+                    customClass: { confirmButton: 'btn btn-main' },
+                    buttonsStyling: false
+                });
+                input.value = "";
+                input.focus();
+            }
+        }
+
+        function handleTelefonoBlur() {
+            const input = this;
+            if (input.value && !validarTelefono(input.value)) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Teléfono inválido',
+                    text: 'El teléfono debe contener solo números (mínimo 6, máximo 15 dígitos)',
+                    confirmButtonText: 'Corregir',
+                    customClass: { confirmButton: 'btn btn-main' },
+                    buttonsStyling: false
+                });
+                input.value = "";
+                input.focus();
+            }
+        }
+
+        function handleTelefonoEmergenciaBlur() {
+            const input = this;
+            if (input.value && !validarTelefono(input.value)) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Teléfono de emergencia inválido',
+                    text: 'Debe contener solo números (mínimo 6, máximo 15 dígitos)',
+                    confirmButtonText: 'Corregir',
+                    customClass: { confirmButton: 'btn btn-main' },
+                    buttonsStyling: false
+                });
+                input.value = "";
+                input.focus();
+            }
+        }
+
+        function handleEmailBlur() {
+            const input = this;
+            if (input.value && !validarEmail(input.value)) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Email inválido',
+                    text: 'Por favor, ingrese un email válido (ejemplo: usuario@dominio.com)',
+                    confirmButtonText: 'Corregir',
+                    customClass: { confirmButton: 'btn btn-main' },
+                    buttonsStyling: false
+                });
+                input.value = "";
+                input.focus();
+            }
+        }
+
+        function handleNombreBlur() {
+            const input = this;
+            if (input.value && !validarNombre(input.value)) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Nombre inválido',
+                    text: 'El nombre debe tener al menos 3 caracteres y solo letras',
+                    confirmButtonText: 'Corregir',
+                    customClass: { confirmButton: 'btn btn-main' },
+                    buttonsStyling: false
+                });
+                input.value = "";
+                input.focus();
+            }
+        }
+
+        // ========== CRUD PACIENTES ==========
+        function mostrarModalNuevoPaciente() {
+            document.getElementById("modalPacienteTitle").innerHTML = '<i class="icofont-user"></i> Nuevo Paciente';
+            document.getElementById("pacienteId").value = "";
+            document.getElementById("pacienteDni").value = "";
+            document.getElementById("pacienteNombre").value = "";
+            document.getElementById("pacienteTelefono").value = "";
+            document.getElementById("pacienteEmail").value = "";
+            document.getElementById("pacienteFechaNacimiento").value = "";
+            document.getElementById("pacienteDireccion").value = "";
+            document.getElementById("pacienteObraSocial").value = "";
+            document.getElementById("pacienteNumeroAfiliado").value = "";
+            document.getElementById("pacienteContactoEmergencia").value = "";
+            document.getElementById("pacienteTelefonoEmergencia").value = "";
+            document.getElementById("pacienteAlergias").value = "";
+            document.getElementById("pacienteAntecedentes").value = "";
+            
+            $('#modalPaciente').modal({
+                backdrop: 'static',
+                keyboard: true,
+                focus: true
+            });
+            
+            setTimeout(configurarValidacionesModal, 100);
+        }
+
+        function editarPaciente(id) {
+            const paciente = pacientesOriginales.find(p => p.id === id);
+            if (paciente) {
+                document.getElementById("modalPacienteTitle").innerHTML = '<i class="icofont-edit"></i> Editar Paciente';
+                document.getElementById("pacienteId").value = paciente.id;
+                document.getElementById("pacienteDni").value = paciente.dni;
+                document.getElementById("pacienteNombre").value = paciente.nombre;
+                document.getElementById("pacienteTelefono").value = paciente.telefono || "";
+                document.getElementById("pacienteEmail").value = paciente.email || "";
+                document.getElementById("pacienteFechaNacimiento").value = formatearFechaParaInput(paciente.fecha_nacimiento) || "";
+                document.getElementById("pacienteDireccion").value = paciente.direccion || "";
+                document.getElementById("pacienteObraSocial").value = paciente.obra_social || "";
+                document.getElementById("pacienteNumeroAfiliado").value = paciente.numero_afiliado || "";
+                document.getElementById("pacienteContactoEmergencia").value = paciente.contacto_emergencia || "";
+                document.getElementById("pacienteTelefonoEmergencia").value = paciente.telefono_emergencia || "";
+                document.getElementById("pacienteAlergias").value = paciente.alergias || "";
+                document.getElementById("pacienteAntecedentes").value = paciente.antecedentes || "";
+                
+                $('#modalPaciente').modal({
+                    backdrop: 'static',
+                    keyboard: true,
+                    focus: true
+                });
+                
+                setTimeout(configurarValidacionesModal, 100);
+            }
+        }
+
+        function guardarPaciente() {
+            const dni = document.getElementById("pacienteDni").value;
+            const nombre = document.getElementById("pacienteNombre").value;
+            const telefono = document.getElementById("pacienteTelefono").value;
+            const email = document.getElementById("pacienteEmail").value;
+            
+            if (!dni || !nombre) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Campos incompletos',
+                    text: 'El DNI y el nombre son obligatorios',
+                    confirmButtonText: 'Entendido',
+                    customClass: { confirmButton: 'btn btn-main' },
+                    buttonsStyling: false
+                });
+                return;
+            }
+            
+            if (!validarDNI(dni)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'DNI inválido',
+                    text: 'El DNI debe contener solo números y máximo 8 dígitos',
+                    confirmButtonText: 'Corregir',
+                    customClass: { confirmButton: 'btn btn-main' },
+                    buttonsStyling: false
+                });
+                document.getElementById("pacienteDni").focus();
+                return;
+            }
+            
+            if (!validarNombre(nombre)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Nombre inválido',
+                    text: 'El nombre debe tener al menos 3 caracteres y solo letras',
+                    confirmButtonText: 'Corregir',
+                    customClass: { confirmButton: 'btn btn-main' },
+                    buttonsStyling: false
+                });
+                document.getElementById("pacienteNombre").focus();
+                return;
+            }
+            
+            if (telefono && !validarTelefono(telefono)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Teléfono inválido',
+                    text: 'El teléfono debe contener solo números (mínimo 6, máximo 15 dígitos)',
+                    confirmButtonText: 'Corregir',
+                    customClass: { confirmButton: 'btn btn-main' },
+                    buttonsStyling: false
+                });
+                document.getElementById("pacienteTelefono").focus();
+                return;
+            }
+            
+            if (email && !validarEmail(email)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Email inválido',
+                    text: 'Por favor, ingrese un email válido',
+                    confirmButtonText: 'Corregir',
+                    customClass: { confirmButton: 'btn btn-main' },
+                    buttonsStyling: false
+                });
+                document.getElementById("pacienteEmail").focus();
+                return;
+            }
+            
+            const datos = {
+                dni: dni,
+                nombre: nombre,
+                telefono: telefono,
+                email: email,
+                fecha_nacimiento: document.getElementById("pacienteFechaNacimiento").value,
+                direccion: document.getElementById("pacienteDireccion").value,
+                obra_social: document.getElementById("pacienteObraSocial").value,
+                numero_afiliado: document.getElementById("pacienteNumeroAfiliado").value,
+                contacto_emergencia: document.getElementById("pacienteContactoEmergencia").value,
+                telefono_emergencia: document.getElementById("pacienteTelefonoEmergencia").value,
+                alergias: document.getElementById("pacienteAlergias").value,
+                antecedentes: document.getElementById("pacienteAntecedentes").value
+            };
+            
+            Swal.fire({
+                title: 'Guardando paciente...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            fetch("/pacientes", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(datos)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Guardado!',
+                        text: 'Paciente guardado correctamente',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        $('#modalPaciente').modal('hide');
+                        cargarPacientes();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.error || "Error al guardar el paciente",
+                        confirmButtonText: 'Entendido',
+                        customClass: { confirmButton: 'btn btn-main' },
+                        buttonsStyling: false
+                    });
+                }
+            })
+            .catch(err => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: err.message,
+                    confirmButtonText: 'Entendido',
+                    customClass: { confirmButton: 'btn btn-main' },
+                    buttonsStyling: false
+                });
+            });
+        }
+
+        function confirmarEliminarPaciente(id, nombre) {
+            Swal.fire({
+                title: '¿Eliminar paciente?',
+                html: `¿Está seguro de que desea eliminar al paciente <strong>${escapeHtml(nombre)}</strong>?<br><br>
+                       <span class="text-danger">⚠️ Esta acción eliminará también sus historias clínicas y turnos pasados.</span><br>
+                       <small>Esta acción no se puede deshacer.</small>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                customClass: {
+                    confirmButton: 'btn btn-danger',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    pacienteAEliminar = { id, nombre };
+                    
+                    Swal.fire({
+                        title: 'Eliminando...',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    
+                    fetch(`/pacientes/${id}`, { 
+                        method: "DELETE",
+                        headers: { "Content-Type": "application/json" }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Paciente eliminado',
+                                text: `Paciente "${nombre}" eliminado correctamente`,
+                                timer: 2000,
+                                showConfirmButton: false
+                            }).then(() => {
+                                cargarPacientes();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: data.message || "Error al eliminar paciente",
+                                confirmButtonText: 'Entendido',
+                                customClass: { confirmButton: 'btn btn-main' },
+                                buttonsStyling: false
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: err.message,
+                            confirmButtonText: 'Entendido',
+                            customClass: { confirmButton: 'btn btn-main' },
+                            buttonsStyling: false
+                        });
+                    })
+                    .finally(() => { 
+                        pacienteAEliminar = null; 
+                    });
+                }
+            });
+        }
+
+        // ========== BUSCADOR ==========
+        document.getElementById("buscador").addEventListener("input", function(e) {
+            const termino = e.target.value.toLowerCase();
+            
+            const filtrados = pacientesOriginales.filter(paciente => {
+                return paciente.nombre.toLowerCase().includes(termino) || 
+                       paciente.dni.includes(termino) ||
+                       (paciente.telefono && paciente.telefono.includes(termino));
+            });
+            
+            renderizarPacientes(filtrados);
+        });
+
+        // ========== CONFIGURACIÓN DE MODALES E INICIALIZACIÓN ==========
+        $(document).ready(function() {
+            document.getElementById("btnConfirmarEliminar").onclick = function() {
+                if (pacienteAEliminar) {
+                    ejecutarEliminacion();
+                }
+            };
+            
+            $('#modalPaciente, #modalConfirmarEliminar').on('shown.bs.modal', function() {
+                const firstFocusable = $(this).find('input:not([type="hidden"]), button:not(.close), textarea, select').first();
+                if (firstFocusable.length) {
+                    setTimeout(() => firstFocusable.focus(), 50);
+                }
+            });
+            
+            $('#modalPaciente, #modalConfirmarEliminar').on('hidden.bs.modal', function() {
+                $(this).removeAttr('style');
+                $('body').removeClass('modal-open');
+                $('.modal-backdrop').remove();
+                if (this.id === 'modalConfirmarEliminar') {
+                    pacienteAEliminar = null;
+                }
+            });
+            
+            cargarPacientes();
+        });
+
+        function ejecutarEliminacion() {
+            if (!pacienteAEliminar) return;
+            
+            fetch(`/pacientes/${pacienteAEliminar.id}`, { 
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Paciente eliminado',
+                        text: `Paciente "${pacienteAEliminar.nombre}" eliminado correctamente`,
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        cargarPacientes();
+                    });
+                    $('#modalConfirmarEliminar').modal('hide');
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message || "Error al eliminar paciente",
+                        confirmButtonText: 'Entendido',
+                        customClass: { confirmButton: 'btn btn-main' },
+                        buttonsStyling: false
+                    });
+                }
+            })
+            .catch(err => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: err.message,
+                    confirmButtonText: 'Entendido',
+                    customClass: { confirmButton: 'btn btn-main' },
+                    buttonsStyling: false
+                });
+            })
+            .finally(() => { 
+                pacienteAEliminar = null; 
+            });
+        }
+    </script>
+</body>
+</html>

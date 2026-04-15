@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación de Turno - Consultorio Médico</title>
+    <link rel="stylesheet" href="plugins/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="plugins/icofont/icofont.min.css">
+    <!-- SweetAlert2 CSS y JS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style2.css">
+    <style>
+        :root { --primary-color: #223a66; --accent-color: #e12454; }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 0;
+        }
+        
+        .confirmation-card {
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            animation: fadeInUp 0.5s ease;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .confirmation-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1a2c4e 100%);
+            padding: 40px;
+            text-align: center;
+            color: white;
+        }
+        
+        .confirmation-header .icon-success {
+            background: var(--accent-color);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            animation: pulse 0.8s ease;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .confirmation-header .icon-success i {
+            font-size: 40px;
+            color: white;
+        }
+        
+        .confirmation-header h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 10px;
+        }
+        
+        .confirmation-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .confirmation-body {
+            padding: 40px;
+        }
+        
+        .turno-detalle {
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .turno-detalle h4 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .info-row {
+            display: flex;
+            margin-bottom: 15px;
+            align-items: flex-start;
+        }
+        
+        .info-label {
+            width: 120px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .info-value {
+            flex: 1;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .info-value strong {
+            color: var(--primary-color);
+        }
+        
+        .info-icon {
+            width: 30px;
+            color: var(--accent-color);
+            font-size: 18px;
+        }
+        
+        .btn-group-custom {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .btn-custom {
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            text-decoration: none;
+        }
+        
+        .btn-primary-custom {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+        }
+        
+        .btn-primary-custom:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+        
+        .btn-secondary-custom {
+            background: #6c757d;
+            color: white;
+            border: none;
+        }
+        
+        .btn-secondary-custom:hover {
+            background: #5a6268;
+            color: white;
+        }
+        
+        .btn-success-custom {
+            background: #25D366;
+            color: white;
+            border: none;
+        }
+        
+        .btn-success-custom:hover {
+            background: #20b859;
+            color: white;
+        }
+        
+        .btn-outline-custom {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .btn-outline-custom:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .badge-fecha {
+            background: var(--accent-color);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        
+        .qr-code {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .qr-code p {
+            font-size: 12px;
+            color: #888;
+            margin-top: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .confirmation-header {
+                padding: 30px;
+            }
+            .confirmation-body {
+                padding: 25px;
+            }
+            .info-row {
+                flex-direction: column;
+            }
+            .info-label {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+            .btn-custom {
+                width: 100%;
+                justify-content: center;
+            }
+            .btn-group-custom {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="confirmation-card">
+                    <div class="confirmation-header">
+                        <div class="icon-success">
+                            <i class="icofont-check-circled"></i>
+                        </div>
+                        <h2>¡Turno Confirmado!</h2>
+                        <p>Su turno ha sido registrado exitosamente</p>
+                    </div>
+                    
+                    <div class="confirmation-body">
+                        <div class="turno-detalle">
+                            <h4><i class="icofont-medical-record-alt"></i> Detalles del Turno</h4>
+                            
+                            <div class="info-row">
+                                <div class="info-icon">
+                                    <i class="icofont-user"></i>
+                                </div>
+                                <div class="info-label">Paciente:</div>
+                                <div class="info-value"><strong id="paciente">-</strong></div>
+                            </div>
+                            
+                            <div class="info-row">
+                                <div class="info-icon">
+                                    <i class="icofont-id-card"></i>
+                                </div>
+                                <div class="info-label">DNI:</div>
+                                <div class="info-value"><strong id="dni">-</strong></div>
+                            </div>
+                            
+                            <div class="info-row">
+                                <div class="info-icon">
+                                    <i class="icofont-doctor"></i>
+                                </div>
+                                <div class="info-label">Médico:</div>
+                                <div class="info-value"><strong id="medico_confirm">-</strong></div>
+                            </div>
+                            
+                            <div class="info-row">
+                                <div class="info-icon">
+                                    <i class="icofont-building"></i>
+                                </div>
+                                <div class="info-label">Consultorio:</div>
+                                <div class="info-value"><strong id="consul_confirm">-</strong></div>
+                            </div>
+                            
+                            <div class="info-row">
+                                <div class="info-icon">
+                                    <i class="icofont-calendar"></i>
+                                </div>
+                                <div class="info-label">Fecha:</div>
+                                <div class="info-value"><strong id="fecha">-</strong> <span class="badge-fecha" id="diaSemana"></span></div>
+                            </div>
+                            
+                            <div class="info-row">
+                                <div class="info-icon">
+                                    <i class="icofont-clock"></i>
+                                </div>
+                                <div class="info-label">Hora:</div>
+                                <div class="info-value"><strong id="hora">-</strong></div>
+                            </div>
+                            
+                            <div class="info-row">
+                                <div class="info-icon">
+                                    <i class="icofont-phone"></i>
+                                </div>
+                                <div class="info-label">Teléfono:</div>
+                                <div class="info-value" id="telefono">-</div>
+                            </div>
+                            
+                            <div class="info-row">
+                                <div class="info-icon">
+                                    <i class="icofont-notes"></i>
+                                </div>
+                                <div class="info-label">Observaciones:</div>
+                                <div class="info-value" id="observaciones">-</div>
+                            </div>
+                        </div>
+                        
+                        <div class="qr-code">
+                            <i class="icofont-qr-code" style="font-size: 48px; color: var(--primary-color);"></i>
+                            <p>Presente este comprobante el día de su turno</p>
+                        </div>
+                        
+                        <div class="btn-group-custom">
+<button onclick="enviarWhatsAppBusiness()" class="btn-custom btn-success-custom">
+    <i class="icofont-whatsapp"></i> Enviar por WhatsApp
+</button>
+    <button onclick="window.print()" class="btn-custom btn-secondary-custom">
+        <i class="icofont-print"></i> Imprimir Comprobante
+    </button>
+    <a href="agenda.html" class="btn-custom btn-primary-custom">
+        <i class="icofont-calendar"></i> Ver Agenda
+    </a>
+    <a href="index.html" class="btn-custom btn-outline-custom">
+        <i class="icofont-home"></i> Ir al Inicio
+    </a>
+</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+    // Verificar autenticación
+    if (sessionStorage.getItem("logeado") !== "true") {
+        window.location.href = "login.html";
+    }
+    
+    // Leer datos guardados en appoinment.html
+    const datos = JSON.parse(localStorage.getItem("turno"));
+    
+    // Función para formatear fecha
+    function formatearFechaMostrar(fechaISO) {
+        if (!fechaISO) return 'N/A';
+        const parteFecha = fechaISO.split('T')[0];
+        const [anio, mes, dia] = parteFecha.split('-');
+        return `${dia}/${mes}/${anio}`;
+    }
+    
+    // Función para obtener día de la semana
+    function obtenerDiaSemana(fechaISO) {
+        if (!fechaISO) return '';
+        const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+        const fecha = new Date(fechaISO);
+        return dias[fecha.getDay()];
+    }
+    
+    // Mostrar datos en la página
+    if (datos) {
+        document.getElementById("paciente").innerText = datos.nombre || '-';
+        document.getElementById("dni").innerText = datos.dni || 'N/A';
+        document.getElementById("medico_confirm").innerText = datos.medico || '-';
+        document.getElementById("consul_confirm").innerText = datos.consultorio || '-';
+        document.getElementById("fecha").innerText = formatearFechaMostrar(datos.fecha);
+        document.getElementById("diaSemana").innerText = obtenerDiaSemana(datos.fecha);
+        document.getElementById("hora").innerText = datos.hora ? datos.hora.substring(0, 5) : '-';
+        document.getElementById("telefono").innerText = datos.telefono || 'No registrado';
+        document.getElementById("observaciones").innerText = datos.mensaje || "Sin observaciones";
+    }
+    
+    // ========== FUNCIÓN PARA ENVIAR WHATSAPP (VERSIÓN CORREGIDA) ==========
+function enviarWhatsAppBusiness() {
+    if (!datos) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Error',
+            text: 'No hay datos del turno',
+            confirmButtonText: 'Entendido'
+        });
+        return;
+    }
+    
+    const telefono = datos.telefono;
+    
+    if (!telefono || telefono === 'No registrado') {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Sin número de teléfono',
+            text: 'El paciente no tiene número de teléfono registrado.',
+            confirmButtonText: 'Entendido'
+        });
+        return;
+    }
+    
+    let numeroLimpio = telefono.replace(/[^0-9]/g, '');
+    if (numeroLimpio.length === 10) {
+        numeroLimpio = '549' + numeroLimpio;
+    }
+    
+    const fechaFormateada = formatearFechaMostrar(datos.fecha);
+    const horaFormateada = datos.hora ? datos.hora.substring(0, 5) : '--:--';
+    
+    // Crear un objeto URL para manejar la codificación correctamente
+    const mensajePartes = [
+        "🏥 *CONSULTORIO MEDICO* 🏥",
+        "✅ *TURNO CONFIRMADO* ✅",
+        "",
+        "─────────────────────────────────",
+        "👤 *DATOS DEL PACIENTE*",
+        "─────────────────────────────────",
+        "📛 Nombre    : " + datos.nombre,
+        "🆔 DNI       : " + (datos.dni || 'N/A'),
+        "📞 Teléfono  : " + (datos.telefono || 'N/A'),
+        "",
+        "─────────────────────────────────",
+        "👨‍⚕️ *DATOS DEL TURNO*",
+        "─────────────────────────────────",
+        "👨‍⚕️ Médico     : " + datos.medico,
+        "🏢 Consultorio: " + (datos.consultorio || 'No especificado'),
+        "📅 Fecha      : " + fechaFormateada,
+        "⏰ Hora       : " + horaFormateada + " hs",
+        "📝 Motivo     : " + (datos.mensaje || 'Consulta médica'),
+        "",
+        "─────────────────────────────────",
+        "⚠️ *RECOMENDACIONES IMPORTANTES*",
+        "─────────────────────────────────",
+        "✅ Llegar con 10 minutos de anticipación",
+        "✅ Traer DNI y documentación médica",
+        "✅ Presentar este comprobante",
+        "✅ Traer estudios previos si los tiene",
+        "",
+        "🌟 ¡Gracias por confiar en nosotros! 🌟"
+    ];
+    
+    // Unir con saltos de línea y codificar para URL
+    const mensajeCompleto = mensajePartes.join('\n');
+    
+    // Usar encodeURIComponent que es el método estándar
+    const mensajeCodificado = encodeURIComponent(mensajeCompleto);
+    const urlWhatsApp = `https://wa.me/${numeroLimpio}?text=${mensajeCodificado}`;
+    
+    console.log("URL generada:", urlWhatsApp);
+    
+    // Abrir en una nueva ventana
+    const ventanaWhatsApp = window.open(urlWhatsApp, '_blank');
+    
+    if (!ventanaWhatsApp) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Bloqueador de ventanas',
+            text: 'Por favor, permite las ventanas emergentes para este sitio',
+            confirmButtonText: 'Entendido'
+        });
+        return;
+    }
+    
+    Swal.fire({
+        icon: 'success',
+        title: '✅ WhatsApp abierto',
+        text: 'El mensaje con emojis está listo para enviar',
+        timer: 2500,
+        showConfirmButton: false
+    });
+}
+ </script>
+</body>
+</html>

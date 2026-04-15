@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Administración - Consultorio Médico</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="plugins/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="plugins/icofont/icofont.min.css">
+    <!-- SweetAlert2 CSS y JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style2.css">
+    <style>
+        :root { --primary-color: #223a66; --accent-color: #e12454; }
+        
+        .admin-card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        
+        .admin-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+        }
+        
+        .admin-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            border-bottom: 3px solid var(--accent-color);
+        }
+        
+        .admin-header h4 {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .admin-body {
+            padding: 20px;
+            background: white;
+        }
+        
+        .medico-item, .consultorio-item, .user-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .medico-item:hover, .consultorio-item:hover, .user-item:hover {
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .btn-icon {
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            margin: 0 2px;
+        }
+        
+        .btn-add {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .btn-add:hover {
+            background: var(--accent-color);
+            transform: scale(1.02);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .modal-custom .modal-header {
+            background: var(--primary-color);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+        
+        .modal-custom .btn-close-custom {
+            color: white;
+            opacity: 0.8;
+        }
+        
+        .badge-especialidad {
+            background: var(--accent-color);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            margin-left: 10px;
+        }
+        
+        .nav-tabs-custom {
+            border-bottom: 2px solid #e0e0e0;
+            margin-bottom: 25px;
+        }
+        
+        .nav-tabs-custom .nav-link {
+            border: none;
+            color: #666;
+            font-weight: 500;
+            padding: 12px 25px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tabs-custom .nav-link:hover {
+            color: var(--primary-color);
+            background: transparent;
+        }
+        
+        .nav-tabs-custom .nav-link.active {
+            color: var(--accent-color);
+            border-bottom: 3px solid var(--accent-color);
+            background: transparent;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-info i {
+            font-size: 20px;
+            color: var(--primary-color);
+        }
+        
+        .user-role {
+            font-size: 11px;
+            background: #e9ecef;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-left: 10px;
+        }
+        
+        .user-role.admin {
+            background: var(--accent-color);
+            color: white;
+        }
+        
+        .btn-delete-user {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-delete-user:hover {
+            background: #c82333;
+            transform: scale(1.02);
+        }
+        
+        .btn-delete-user:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .btn-backup {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-backup:hover {
+            background: #218838;
+            transform: scale(1.02);
+        }
+
+        /* Estilos para la lista de backups */
+        .backup-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .backup-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+            border-left: 4px solid #28a745;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .backup-item:hover {
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .backup-info {
+            flex: 1;
+        }
+
+        .backup-nombre {
+            font-weight: 600;
+            color: #223a66;
+            word-break: break-all;
+        }
+
+        .backup-fecha {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .backup-tamaño {
+            font-size: 11px;
+            color: #28a745;
+            margin-top: 3px;
+        }
+
+        .backup-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-backup-action {
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-descargar {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-descargar:hover {
+            background: #138496;
+        }
+
+        .btn-eliminar-backup {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-eliminar-backup:hover {
+            background: #c82333;
+        }
+
+        /* Estilos SweetAlert */
+        .swal2-popup {
+            border-radius: 20px !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+        
+        .swal2-title {
+            color: #223a66 !important;
+            font-weight: 600 !important;
+        }
+        
+        .swal2-confirm.btn-main {
+            background: #223a66 !important;
+            color: white !important;
+            border: none !important;
+            padding: 10px 25px !important;
+            border-radius: 8px !important;
+            font-weight: 500 !important;
+        }
+        
+        .swal2-confirm.btn-main:hover {
+            background: #e12454 !important;
+        }
+        
+        .swal2-confirm.btn-danger {
+            background: #dc3545 !important;
+        }
+        
+        .swal2-cancel.btn-secondary {
+            background: #6c757d !important;
+        }
+    </style>
+</head>
+<body class="gray-bg">
+    <script>
+        // VALIDACIÓN DE SEGURIDAD
+        const usuarioActual = sessionStorage.getItem("usuario_actual");
+
+        if (sessionStorage.getItem("logeado") !== "true") {
+            window.location.href = "login.html";
+        }
+
+        if (usuarioActual !== "admin") {
+            alert("Acceso denegado: Solo el administrador puede gestionar el sistema.");
+            window.location.href = "index.html";
+        }
+    </script>
+
+    <nav class="navbar navbar-expand-lg navigation mb-4">
+        <div class="container-fluid px-5">
+            <a class="navbar-brand" href="index.html">
+                <img src="images/logo.png" alt="Logo" style="max-height: 40px;">
+            </a>
+            <div class="collapse navbar-collapse" id="navbarmain">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="agenda.html">Agenda</a></li>
+                    <li class="nav-item"><a class="nav-link" href="historia.html">Historia Clínica</a></li>
+                    <li class="nav-item"><a class="nav-link" href="gestion_historias.html">Gestión HC</a></li>
+                    <li class="nav-item active"><a class="nav-link" href="admin.html">Administración</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-5">
+        <div class="row">
+            <div class="col-12">
+                <div class="admin-card fade-in">
+                    <div class="admin-header">
+                        <h4><i class="icofont-settings"></i> Panel de Administración</h4>
+                    </div>
+                    <div class="admin-body">
+                        <ul class="nav nav-tabs nav-tabs-custom" id="adminTab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="medicos-tab" data-toggle="tab" href="#medicos" role="tab">
+                                    <i class="icofont-doctor"></i> Médicos
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="consultorios-tab" data-toggle="tab" href="#consultorios" role="tab">
+                                    <i class="icofont-building"></i> Consultorios
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="usuarios-tab" data-toggle="tab" href="#usuarios" role="tab">
+                                    <i class="icofont-users-alt-2"></i> Usuarios
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="whatsapp-tab" data-toggle="tab" href="#whatsapp" role="tab">
+                                    <i class="icofont-whatsapp"></i> WhatsApp Business
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="backup-tab" data-toggle="tab" href="#backup" role="tab">
+                                    <i class="icofont-database"></i> Seguridad
+                                </a>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <!-- Tab MÉDICOS -->
+                            <div class="tab-pane fade show active" id="medicos" role="tabpanel">
+                                <div class="d-flex justify-content-end mb-3">
+                                    <button class="btn-add" onclick="mostrarModalMedico()">
+                                        <i class="icofont-plus"></i> Nuevo Médico
+                                    </button>
+                                </div>
+                                <div id="listaMedicos"></div>
+                            </div>
+
+                            <!-- Tab CONSULTORIOS -->
+                            <div class="tab-pane fade" id="consultorios" role="tabpanel">
+                                <div class="d-flex justify-content-end mb-3">
+                                    <button class="btn-add" onclick="mostrarModalConsultorio()">
+                                        <i class="icofont-plus"></i> Nuevo Consultorio
+                                    </button>
+                                </div>
+                                <div id="listaConsultorios"></div>
+                            </div>
+
+                            <!-- Tab USUARIOS -->
+                            <div class="tab-pane fade" id="usuarios" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-lg-7 mb-4">
+                                        <h5><i class="icofont-users-alt-2"></i> Usuarios del Sistema</h5>
+                                        <hr>
+                                        <div id="listaUsuarios" class="user-list mb-4"></div>
+                                    </div>
+                                    <div class="col-lg-5">
+                                        <div class="card p-4 shadow-sm border-0" style="border-radius:15px; background: #f8f9fa;">
+                                            <h5><i class="icofont-user"></i> Crear Nuevo Usuario</h5>
+                                            <hr>
+                                            <div class="form-group">
+                                                <input type="text" id="new_user" class="form-control mb-2" placeholder="Nombre de usuario">
+                                                <input type="password" id="new_pass" class="form-control mb-2" placeholder="Contraseña">
+                                                <button class="btn btn-main-2 btn-block" onclick="crearUsuario()">
+                                                    <i class="icofont-plus"></i> Añadir Usuario
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="card p-4 shadow-sm border-0 mt-4" style="border-radius:15px; background: #f8f9fa;">
+                                            <h5><i class="icofont-key"></i> Cambiar Contraseña</h5>
+                                            <hr>
+                                            <div class="form-group">
+                                                <input type="text" id="change_user" class="form-control mb-2" placeholder="Usuario a modificar">
+                                                <input type="password" id="change_pass" class="form-control mb-2" placeholder="Nueva Contraseña">
+                                                <button class="btn btn-main btn-block" onclick="cambiarPassword()">
+                                                    <i class="icofont-refresh"></i> Actualizar Contraseña
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tab WHATSAPP BUSINESS -->
+                            <div class="tab-pane fade" id="whatsapp" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-6 mb-4">
+                                        <div class="card p-4 shadow-sm border-0">
+                                            <h5><i class="icofont-whatsapp"></i> Estado de Conexión</h5>
+                                            <hr>
+                                            <div id="whatsappStatus" class="text-center p-3">
+                                                <i class="icofont-spinner"></i> Verificando...
+                                            </div>
+                                            <button class="btn btn-main mt-3" onclick="verificarWhatsAppStatus()">
+                                                <i class="icofont-refresh"></i> Verificar Conexión
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-4">
+                                        <div class="card p-4 shadow-sm border-0">
+                                            <h5><i class="icofont-calendar"></i> Recordatorios Automáticos</h5>
+                                            <hr>
+                                            <p>Enviar recordatorios a todos los pacientes con turnos para mañana.</p>
+                                            <button class="btn btn-success btn-block" onclick="enviarRecordatoriosMasivos()">
+                                                <i class="icofont-whatsapp"></i> Enviar Recordatorios
+                                            </button>
+                                            <div id="recordatorioResultado" class="mt-3 small"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-12">
+                                        <div class="card p-4 shadow-sm border-0">
+                                            <h5><i class="icofont-gear"></i> Configuración Webhook</h5>
+                                            <hr>
+                                            <p><strong>URL del Webhook:</strong> <code id="webhookUrl">https://tu-dominio.com/api/whatsapp/webhook</code></p>
+                                            <p><strong>Verify Token:</strong> <code id="verifyToken">cargando...</code></p>
+                                            <div class="alert alert-info">
+                                                <i class="icofont-info-circle"></i> Configura esta URL en Meta for Developers > WhatsApp > Configuración
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tab BACKUP (Seguridad) -->
+                            <div class="tab-pane fade" id="backup" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="card p-4 shadow-sm border-0" style="border-radius:15px; background: linear-gradient(135deg, #223a66 0%, #1a2c4e 100%); color: white;">
+                                            <h4><i class="icofont-database mr-2"></i> Copia de Seguridad</h4>
+                                            <hr class="bg-white">
+                                            
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label style="color: white;">Nombre personalizado (opcional)</label>
+                                                        <input type="text" id="backupNombre" class="form-control" placeholder="Ej: backup_semanal">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label style="color: white;">Ubicación personalizada (opcional)</label>
+                                                        <input type="text" id="backupUbicacion" class="form-control" placeholder="Ej: C:/Backups o /home/user/backups">
+                                                        <small class="text-light">Dejar vacío para guardar en la carpeta /backups del servidor</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <button class="btn btn-backup btn-block" onclick="crearBackup()" style="background: #28a745;">
+                                                        <i class="icofont-database"></i> Realizar Backup
+                                                    </button>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <button class="btn btn-info btn-block" onclick="cargarListaBackups()">
+                                                        <i class="icofont-list"></i> Ver Backups Guardados
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            
+                                            <div id="backup_msg" class="mt-3 small text-center"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-lg-12 mt-4">
+                                        <div class="card p-4 shadow-sm border-0" style="border-radius:15px;">
+                                            <h5><i class="icofont-folder"></i> Backups Guardados</h5>
+                                            <hr>
+                                            <div id="listaBackups" class="backup-list">
+                                                <p class="text-muted text-center">Cargando lista de backups...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Médico -->
+    <div class="modal fade modal-custom" id="modalMedico" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="icofont-doctor"></i> Médico</h5>
+                    <button type="button" class="close btn-close-custom" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="medicoId">
+                    <div class="form-group">
+                        <label>Nombre completo *</label>
+                        <input type="text" id="medicoNombre" class="form-control" placeholder="Dr. Juan Pérez">
+                    </div>
+                    <div class="form-group">
+                        <label>Especialidad</label>
+                        <input type="text" id="medicoEspecialidad" class="form-control" placeholder="Cardiología">
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input type="text" id="medicoTelefono" class="form-control" placeholder="123456789">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="medicoEmail" class="form-control" placeholder="doctor@clinica.com">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="guardarMedico()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Consultorio -->
+    <div class="modal fade modal-custom" id="modalConsultorio" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="icofont-building"></i> Consultorio</h5>
+                    <button type="button" class="close btn-close-custom" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="consultorioId">
+                    <div class="form-group">
+                        <label>Nombre / Número *</label>
+                        <input type="text" id="consultorioNombre" class="form-control" placeholder="Consultorio 3">
+                    </div>
+                    <div class="form-group">
+                        <label>Ubicación</label>
+                        <input type="text" id="consultorioUbicacion" class="form-control" placeholder="Planta Baja - Ala Norte">
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input type="text" id="consultorioTelefono" class="form-control" placeholder="Teléfono interno">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="guardarConsultorio()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <script>
+        // Verificar que el usuario actual sea admin
+        console.log("Usuario actual:", sessionStorage.getItem("usuario_actual"));
+        if (sessionStorage.getItem("usuario_actual") !== "admin") {
+            alert("Acceso denegado: Solo el administrador puede gestionar el sistema.");
+            window.location.href = "index.html";
+        }
+
+        // ========== FUNCIONES DE VALIDACIÓN ==========
+        function validarNombreMedico(nombre) {
+            const regex = /^[a-zA-ZáéíóúñÑü\s\.]{3,100}$/;
+            return regex.test(nombre.trim());
+        }
+
+        function validarTelefono(telefono) {
+            if (!telefono) return true;
+            const regex = /^\d{6,15}$/;
+            return regex.test(telefono);
+        }
+
+        function validarEmail(email) {
+            if (!email) return true;
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(email);
+        }
+
+        // ========== FUNCIONES PARA MÉDICOS ==========
+        function cargarMedicos() {
+            fetch("/medicos")
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById("listaMedicos");
+                    if (data.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <i class="icofont-doctor-alt"></i>
+                                <p>No hay médicos registrados</p>
+                                <button class="btn-add" onclick="mostrarModalMedico()">
+                                    <i class="icofont-plus"></i> Agregar primer médico
+                                </button>
+                            </div>`;
+                        return;
+                    }
+                    
+                    container.innerHTML = data.map(medico => `
+                        <div class="medico-item">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                                <div>
+                                    <strong><i class="icofont-doctor"></i> ${escapeHtml(medico.nombre)}</strong>
+                                    ${medico.especialidad ? `<span class="badge-especialidad">${escapeHtml(medico.especialidad)}</span>` : ''}
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            <i class="icofont-phone"></i> ${medico.telefono || 'Sin teléfono'}
+                                            ${medico.email ? ` | <i class="icofont-email"></i> ${medico.email}` : ''}
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="mt-2 mt-sm-0">
+                                    <button class="btn btn-sm btn-outline-primary btn-icon" onclick="editarMedico(${medico.id})">
+                                        <i class="icofont-edit"></i> Editar
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger btn-icon" onclick="eliminarMedico(${medico.id}, '${escapeHtml(medico.nombre)}')">
+                                        <i class="icofont-trash"></i> Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                })
+                .catch(err => console.error("Error:", err));
+        }
+
+        function mostrarModalMedico() {
+            document.getElementById("medicoId").value = "";
+            document.getElementById("medicoNombre").value = "";
+            document.getElementById("medicoEspecialidad").value = "";
+            document.getElementById("medicoTelefono").value = "";
+            document.getElementById("medicoEmail").value = "";
+            
+            $('#modalMedico').removeData('bs.modal');
+            
+            setTimeout(function() {
+                $('#modalMedico').modal({
+                    backdrop: 'static',
+                    keyboard: true,
+                    focus: true,
+                    show: true
+                });
+                
+                setTimeout(function() {
+                    document.getElementById("medicoNombre").focus();
+                }, 150);
+            }, 50);
+        }
+
+        function editarMedico(id) {
+            fetch("/medicos")
+                .then(res => res.json())
+                .then(data => {
+                    const medico = data.find(m => m.id === id);
+                    if (medico) {
+                        document.getElementById("medicoId").value = medico.id;
+                        document.getElementById("medicoNombre").value = medico.nombre;
+                        document.getElementById("medicoEspecialidad").value = medico.especialidad || "";
+                        document.getElementById("medicoTelefono").value = medico.telefono || "";
+                        document.getElementById("medicoEmail").value = medico.email || "";
+                        
+                        $('#modalMedico').removeData('bs.modal');
+                        
+                        setTimeout(function() {
+                            $('#modalMedico').modal({
+                                backdrop: 'static',
+                                keyboard: true,
+                                focus: true,
+                                show: true
+                            });
+                            
+                            setTimeout(function() {
+                                document.getElementById("medicoNombre").focus();
+                            }, 150);
+                        }, 50);
+                    }
+                });
+        }
+
+        function eliminarMedico(id, nombre) {
+            Swal.fire({
+                title: '¿Eliminar médico?',
+                html: `¿Está seguro de que desea eliminar al <strong>Dr. ${nombre}</strong>?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                customClass: {
+                    confirmButton: 'btn btn-danger',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Eliminando...',
+                        allowOutsideClick: false,
+                        didOpen: () => { Swal.showLoading(); }
+                    });
+                    
+                    fetch(`/medicos/${id}`, { method: "DELETE" })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                cargarMedicos();
+                                actualizarSelects();
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Médico eliminado',
+                                    text: `El Dr. ${nombre} ha sido eliminado correctamente`,
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'No se pudo eliminar el médico',
+                                    confirmButtonText: 'Entendido'
+                                });
+                            }
+                        });
+                }
+            });
+        }
+
+        function guardarMedico() {
+            const id = document.getElementById("medicoId").value;
+            const nombre = document.getElementById("medicoNombre").value;
+            const telefono = document.getElementById("medicoTelefono").value;
+            const email = document.getElementById("medicoEmail").value;
+            
+            if (!nombre) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Campo requerido',
+                    text: 'El nombre del médico es obligatorio',
+                    confirmButtonText: 'Entendido'
+                });
+                document.getElementById("medicoNombre").focus();
+                return;
+            }
+            
+            if (!validarNombreMedico(nombre)) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Nombre inválido',
+                    text: 'El nombre debe tener al menos 3 caracteres y solo letras',
+                    confirmButtonText: 'Corregir'
+                });
+                document.getElementById("medicoNombre").focus();
+                return;
+            }
+            
+            if (telefono && !validarTelefono(telefono)) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Teléfono inválido',
+                    text: 'El teléfono debe contener solo números (mínimo 6, máximo 15 dígitos)',
+                    confirmButtonText: 'Corregir'
+                });
+                document.getElementById("medicoTelefono").focus();
+                return;
+            }
+            
+            if (email && !validarEmail(email)) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Email inválido',
+                    text: 'Por favor, ingrese un email válido',
+                    confirmButtonText: 'Corregir'
+                });
+                document.getElementById("medicoEmail").focus();
+                return;
+            }
+            
+            const datos = {
+                nombre: nombre,
+                especialidad: document.getElementById("medicoEspecialidad").value,
+                telefono: telefono,
+                email: email
+            };
+            
+            const url = id ? `/medicos/${id}` : "/medicos";
+            const method = id ? "PUT" : "POST";
+            
+            fetch(url, {
+                method: method,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(datos)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: id ? 'Médico actualizado' : 'Médico agregado',
+                        text: id ? 'Los datos del médico han sido actualizados' : 'El médico ha sido agregado correctamente',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    $('#modalMedico').modal('hide');
+                    setTimeout(function() {
+                        $('.modal-backdrop').remove();
+                        $('body').removeClass('modal-open');
+                    }, 150);
+                    cargarMedicos();
+                    actualizarSelects();
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Error al guardar el médico',
+                        confirmButtonText: 'Entendido'
+                    });
+                }
+            })
+            .catch(err => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: err.message,
+                    confirmButtonText: 'Entendido'
+                });
+            });
+        }
+
+        // ========== FUNCIONES PARA CONSULTORIOS ==========
+        function cargarConsultorios() {
+            fetch("/consultorios")
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById("listaConsultorios");
+                    if (data.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <i class="icofont-building-alt"></i>
+                                <p>No hay consultorios registrados</p>
+                                <button class="btn-add" onclick="mostrarModalConsultorio()">
+                                    <i class="icofont-plus"></i> Agregar primer consultorio
+                                </button>
+                            </div>`;
+                        return;
+                    }
+                    
+                    container.innerHTML = data.map(consultorio => `
+                        <div class="consultorio-item">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                                <div>
+                                    <strong><i class="icofont-building"></i> ${escapeHtml(consultorio.nombre)}</strong>
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            <i class="icofont-location-pin"></i> ${consultorio.ubicacion || 'Sin ubicación'}
+                                            ${consultorio.telefono ? ` | <i class="icofont-phone"></i> ${consultorio.telefono}` : ''}
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="mt-2 mt-sm-0">
+                                    <button class="btn btn-sm btn-outline-primary btn-icon" onclick="editarConsultorio(${consultorio.id})">
+                                        <i class="icofont-edit"></i> Editar
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger btn-icon" onclick="eliminarConsultorio(${consultorio.id}, '${escapeHtml(consultorio.nombre)}')">
+                                        <i class="icofont-trash"></i> Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                });
+        }
+
+        function mostrarModalConsultorio() {
+            document.getElementById("consultorioId").value = "";
+            document.getElementById("consultorioNombre").value = "";
+            document.getElementById("consultorioUbicacion").value = "";
+            document.getElementById("consultorioTelefono").value = "";
+            
+            $('#modalConsultorio').removeData('bs.modal');
+            
+            setTimeout(function() {
+                $('#modalConsultorio').modal({
+                    backdrop: 'static',
+                    keyboard: true,
+                    focus: true,
+                    show: true
+                });
+                
+                setTimeout(function() {
+                    document.getElementById("consultorioNombre").focus();
+                }, 150);
+            }, 50);
+        }
+
+        function editarConsultorio(id) {
+            fetch("/consultorios")
+                .then(res => res.json())
+                .then(data => {
+                    const consultorio = data.find(c => c.id === id);
+                    if (consultorio) {
+                        document.getElementById("consultorioId").value = consultorio.id;
+                        document.getElementById("consultorioNombre").value = consultorio.nombre;
+                        document.getElementById("consultorioUbicacion").value = consultorio.ubicacion || "";
+                        document.getElementById("consultorioTelefono").value = consultorio.telefono || "";
+                        
+                        $('#modalConsultorio').removeData('bs.modal');
+                        
+                        setTimeout(function() {
+                            $('#modalConsultorio').modal({
+                                backdrop: 'static',
+                                keyboard: true,
+                                focus: true,
+                                show: true
+                            });
+                            
+                            setTimeout(function() {
+                                document.getElementById("consultorioNombre").focus();
+                            }, 150);
+                        }, 50);
+                    }
+                });
+        }
+
+        function eliminarConsultorio(id, nombre) {
+            if (confirm(`¿Eliminar ${nombre}?`)) {
+                fetch(`/consultorios/${id}`, { method: "DELETE" })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("Consultorio eliminado");
+                            cargarConsultorios();
+                            actualizarSelects();
+                        }
+                    });
+            }
+        }
+
+        function guardarConsultorio() {
+            const id = document.getElementById("consultorioId").value;
+            const datos = {
+                nombre: document.getElementById("consultorioNombre").value,
+                ubicacion: document.getElementById("consultorioUbicacion").value,
+                telefono: document.getElementById("consultorioTelefono").value
+            };
+            
+            if (!datos.nombre) {
+                alert("El nombre del consultorio es obligatorio");
+                return;
+            }
+            
+            const url = id ? `/consultorios/${id}` : "/consultorios";
+            const method = id ? "PUT" : "POST";
+            
+            fetch(url, {
+                method: method,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(datos)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert(id ? "Consultorio actualizado" : "Consultorio agregado");
+                    $('#modalConsultorio').modal('hide');
+                    setTimeout(function() {
+                        $('.modal-backdrop').remove();
+                        $('body').removeClass('modal-open');
+                    }, 150);
+                    cargarConsultorios();
+                    actualizarSelects();
+                } else {
+                    alert("Error al guardar");
+                }
+            });
+        }
+
+        // ========== FUNCIONES PARA USUARIOS ==========
+        function cargarUsuarios() {
+            const usuarioActual = sessionStorage.getItem("usuario_actual");
+            
+            fetch('/usuarios', {
+                headers: { 'x-user-admin': usuarioActual }
+            })
+            .then(res => {
+                if (res.status === 403) {
+                    throw new Error("Acceso denegado. No tienes permisos de administrador.");
+                }
+                return res.json();
+            })
+            .then(data => {
+                const div = document.getElementById("listaUsuarios");
+                
+                if (!Array.isArray(data)) {
+                    div.innerHTML = '<div class="empty-state text-danger"><i class="icofont-warning"></i><p>Error: Datos inválidos del servidor</p></div>';
+                    return;
+                }
+                
+                if (data.length === 0) {
+                    div.innerHTML = '<div class="empty-state"><i class="icofont-users-alt-2"></i><p>No hay usuarios registrados</p><button class="btn-add mt-3" onclick="document.getElementById(\'new_user\').focus()"><i class="icofont-plus"></i> Crear primer usuario</button></div>';
+                    return;
+                }
+                
+                div.innerHTML = data.map(u => `
+                    <div class="user-item">
+                        <div class="user-info">
+                            <i class="icofont-user"></i>
+                            <strong>${escapeHtml(u.usuario)}</strong>
+                            ${u.usuario === 'admin' ? '<span class="user-role admin">Administrador</span>' : '<span class="user-role">Usuario</span>'}
+                        </div>
+                        ${u.usuario !== 'admin' ? `
+                            <button class="btn-delete-user" onclick="eliminarUsuario('${escapeHtml(u.usuario)}', ${u.id})">
+                                <i class="icofont-trash"></i> Eliminar
+                            </button>
+                        ` : '<span class="text-muted" style="font-size:12px;"><i class="icofont-info-circle"></i> No se puede eliminar</span>'}
+                    </div>
+                `).join('');
+            })
+            .catch(err => {
+                document.getElementById("listaUsuarios").innerHTML = `<div class="empty-state text-danger"><i class="icofont-warning"></i><p>Error: ${err.message}</p></div>`;
+            });
+        }
+
+        function eliminarUsuario(nombre, id) {
+            Swal.fire({
+                title: '¿Eliminar usuario?',
+                html: `¿Está seguro de que desea eliminar al usuario <strong>${nombre}</strong>?<br><small>Esta acción no se puede deshacer.</small>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                customClass: {
+                    confirmButton: 'btn btn-danger',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const usuarioActual = sessionStorage.getItem("usuario_actual");
+                    
+                    fetch(`/usuarios/eliminar/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-user-admin': usuarioActual
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            cargarUsuarios();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Usuario eliminado',
+                                text: `Usuario "${nombre}" eliminado correctamente`,
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: data.message || "Error al eliminar usuario",
+                                confirmButtonText: 'Entendido'
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: err.message,
+                            confirmButtonText: 'Entendido'
+                        });
+                    });
+                }
+            });
+        }
+
+        function crearUsuario() {
+            const usuario = document.getElementById("new_user").value;
+            const password = document.getElementById("new_pass").value;
+            const usuarioActual = sessionStorage.getItem("usuario_actual");
+
+            if (!usuario || !password) return alert("Completa todos los campos");
+
+            fetch('/usuarios/nuevo', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-user-admin': usuarioActual
+                },
+                body: JSON.stringify({ usuario, password })
+            })
+            .then(res => {
+                if (res.status === 403) {
+                    throw new Error("No tienes permisos de administrador.");
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data.ok || data.success) {
+                    alert("Usuario creado con éxito");
+                    document.getElementById("new_user").value = "";
+                    document.getElementById("new_pass").value = "";
+                    cargarUsuarios();
+                } else {
+                    alert("Error al crear usuario: " + (data.message || "Error desconocido"));
+                }
+            })
+            .catch(err => alert(err.message));
+        }
+
+        function cambiarPassword() {
+            const usuario = document.getElementById("change_user").value;
+            const newPassword = document.getElementById("change_pass").value;
+            const usuarioActual = sessionStorage.getItem("usuario_actual");
+
+            if (!usuario || !newPassword) return alert("Completa todos los campos");
+
+            fetch('/usuarios/cambiar-pass', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-user-admin': usuarioActual
+                },
+                body: JSON.stringify({ usuario, newPassword })
+            })
+            .then(res => {
+                if (res.status === 403) {
+                    throw new Error("No tienes permisos para modificar usuarios.");
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data.ok || data.success) {
+                    alert("Contraseña actualizada");
+                    document.getElementById("change_user").value = "";
+                    document.getElementById("change_pass").value = "";
+                } else {
+                    alert("Error al actualizar contraseña: " + (data.message || "Error desconocido"));
+                }
+            })
+            .catch(err => alert(err.message));
+        }
+
+        // ========== FUNCIONES PARA BACKUP ==========
+        function crearBackup() {
+            const nombrePersonalizado = document.getElementById("backupNombre").value;
+            const ubicacion = document.getElementById("backupUbicacion").value;
+            
+            const data = {};
+            if (nombrePersonalizado) data.nombrePersonalizado = nombrePersonalizado;
+            if (ubicacion) data.ubicacion = ubicacion;
+            
+            const url = ubicacion ? "/backup/guardar-en" : "/backup/crear";
+            
+            fetch(url, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-user-admin': sessionStorage.getItem("usuario_actual")
+                },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(data => {
+                const msgDiv = document.getElementById("backup_msg");
+                if (data.success) {
+                    msgDiv.innerHTML = `<div class="alert alert-success"><i class="icofont-check-circled"></i> ${data.message}<br>Archivo: ${data.archivo}<br>Ubicación: ${data.ruta}</div>`;
+                    document.getElementById("backupNombre").value = "";
+                    document.getElementById("backupUbicacion").value = "";
+                    cargarListaBackups();
+                } else {
+                    msgDiv.innerHTML = `<div class="alert alert-danger"><i class="icofont-warning"></i> Error: ${data.error}</div>`;
+                }
+                setTimeout(() => { msgDiv.innerHTML = ""; }, 5000);
+            })
+            .catch(err => {
+                document.getElementById("backup_msg").innerHTML = `<div class="alert alert-danger"><i class="icofont-warning"></i> Error: ${err.message}</div>`;
+            });
+        }
+
+        function cargarListaBackups() {
+            const container = document.getElementById("listaBackups");
+            container.innerHTML = '<p class="text-muted text-center">Cargando lista de backups...</p>';
+            
+            fetch("/backup/listar", {
+                headers: { 'x-user-admin': sessionStorage.getItem("usuario_actual") }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) {
+                    container.innerHTML = `<p class="text-danger text-center">Error: ${data.error}</p>`;
+                    return;
+                }
+                
+                if (data.backups.length === 0) {
+                    container.innerHTML = '<p class="text-muted text-center">No hay backups guardados. Realice su primer backup.</p>';
+                    return;
+                }
+                
+                container.innerHTML = data.backups.map(backup => `
+                    <div class="backup-item">
+                        <div class="backup-info">
+                            <div class="backup-nombre"><i class="icofont-file-sql"></i> ${escapeHtml(backup.nombre)}</div>
+                            <div class="backup-fecha"><i class="icofont-calendar"></i> ${new Date(backup.fecha).toLocaleString()}</div>
+                            <div class="backup-tamaño"><i class="icofont-hard-drive"></i> ${formatearTamaño(backup.tamaño)}</div>
+                        </div>
+                        <div class="backup-actions">
+                            <button class="btn-backup-action btn-descargar" onclick="descargarBackup('${backup.nombre}')">
+                                <i class="icofont-download"></i> Descargar
+                            </button>
+                            <button class="btn-backup-action btn-eliminar-backup" onclick="eliminarBackup('${backup.nombre}')">
+                                <i class="icofont-trash"></i> Eliminar
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            })
+            .catch(err => {
+                container.innerHTML = `<p class="text-danger text-center">Error: ${err.message}</p>`;
+            });
+        }
+
+        function descargarBackup(nombre) {
+            window.open(`/backup/descargar/${encodeURIComponent(nombre)}`, '_blank');
+        }
+
+        function eliminarBackup(nombre) {
+            if (confirm(`¿Está seguro de que desea eliminar el backup "${nombre}"?\n\nEsta acción no se puede deshacer.`)) {
+                fetch(`/backup/eliminar/${encodeURIComponent(nombre)}`, {
+                    method: 'DELETE',
+                    headers: { 'x-user-admin': sessionStorage.getItem("usuario_actual") }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Backup eliminado correctamente");
+                        cargarListaBackups();
+                    } else {
+                        alert("Error al eliminar: " + data.error);
+                    }
+                })
+                .catch(err => alert("Error: " + err.message));
+            }
+        }
+
+        function formatearTamaño(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // ========== FUNCIONES AUXILIARES ==========
+        function actualizarSelects() {
+            if (window.opener) {
+                // Actualizar selects si es necesario
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ========== FUNCIONES PARA WHATSAPP BUSINESS ==========
+        function verificarWhatsAppStatus() {
+            fetch('/api/whatsapp/status')
+                .then(res => res.json())
+                .then(data => {
+                    const statusDiv = document.getElementById("whatsappStatus");
+                    if (data.connected) {
+                        statusDiv.innerHTML = `
+                            <div class="alert alert-success">
+                                <i class="icofont-check-circled"></i> Conectado a WhatsApp Business<br>
+                                Número: ${data.phoneNumber}<br>
+                                Calidad: ${data.quality_rating}
+                            </div>
+                        `;
+                    } else {
+                        statusDiv.innerHTML = `
+                            <div class="alert alert-warning">
+                                <i class="icofont-warning"></i> No conectado<br>
+                                ${data.error || 'WhatsApp Business no está configurado'}
+                            </div>
+                        `;
+                    }
+                })
+                .catch(err => {
+                    document.getElementById("whatsappStatus").innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="icofont-warning"></i> Error de conexión: ${err.message}
+                        </div>
+                    `;
+                });
+        }
+
+        function enviarRecordatoriosMasivos() {
+            Swal.fire({
+                title: 'Enviar recordatorios',
+                text: '¿Deseas enviar recordatorios a todos los pacientes con turnos mañana?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, enviar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Enviando recordatorios...',
+                        allowOutsideClick: false,
+                        didOpen: () => { Swal.showLoading(); }
+                    });
+                    
+                    fetch('/api/whatsapp/recordatorio-masivo', { method: 'POST' })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                document.getElementById("recordatorioResultado").innerHTML = `
+                                    <div class="alert alert-success">
+                                        <i class="icofont-check-circled"></i> Enviados: ${data.enviados} de ${data.total} turnos
+                                    </div>
+                                `;
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Recordatorios enviados',
+                                    text: `${data.enviados} mensajes enviados exitosamente`,
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                });
+                            } else {
+                                document.getElementById("recordatorioResultado").innerHTML = `
+                                    <div class="alert alert-danger">
+                                        <i class="icofont-warning"></i> Error: ${data.error}
+                                    </div>
+                                `;
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: data.error,
+                                    confirmButtonText: 'Entendido'
+                                });
+                            }
+                        })
+                        .catch(err => {
+                            document.getElementById("recordatorioResultado").innerHTML = `
+                                <div class="alert alert-danger">
+                                    <i class="icofont-warning"></i> Error: ${err.message}
+                                </div>
+                            `;
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: err.message,
+                                confirmButtonText: 'Entendido'
+                            });
+                        });
+                }
+            });
+        }
+
+        function cargarVerifyToken() {
+            fetch('/api/whatsapp/verify-token')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById("verifyToken").innerText = data.token || 'No configurado';
+                })
+                .catch(() => {
+                    document.getElementById("verifyToken").innerText = 'No disponible';
+                });
+        }
+
+        // ========== CONFIGURACIÓN INICIAL ==========
+        $(document).ready(function() {
+            // Configurar cierre limpio de modales
+            $('#modalMedico, #modalConsultorio').on('hidden.bs.modal', function() {
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open');
+                $(this).removeData('bs.modal');
+            });
+            
+            cargarMedicos();
+            cargarConsultorios();
+            cargarUsuarios();
+            cargarListaBackups();
+            cargarVerifyToken();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Acceso al Sistema - Consultorio</title>
+    <link rel="stylesheet" href="plugins/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+   <link rel="stylesheet" href="css/style2.css">
+   <!-- SweetAlert2 CSS y JS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+</head>
+<body>
+<div class="estilo-login">
+    <div class="login-card text-center">
+    <img src="images/Logo.png" alt="Logo" class="img-fluid mb-4" style="max-height: 100px;">
+    <h3 class="mb-4">Consultorios</h3>
+
+<div class="input-group-custom mb-4">
+    <input type="text" id="user" required="" autocomplete="off" class="input">
+    <label class="user-label">Usuario</label>
+</div>
+
+<div class="input-group-custom mb-4">
+    <input type="password" id="pass" required="" autocomplete="off" class="input">
+    <label class="user-label">Contraseña</label>
+</div>
+
+    <div class="d-flex justify-content-center mt-4">
+    <button type="button" class="btn-plastic-eel" onclick="entrar()">
+        <div class="dots-container">
+            <div class="dotdot dot1"></div>
+            <div class="dotdot dot2"></div>
+            <div class="dotdot dot3"></div>
+            <div class="dotdot dot4"></div>
+            <div class="dotdot dot5"></div>
+        </div>
+        
+        <span>INGRESAR</span>
+        
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 4V20M12 4L4 12M12 4L20 12" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </button>
+</div>
+
+    <p id="error" class="text-danger mt-3" style="display:none;"></p>
+</div>
+
+        <p id="error" class="text-danger mt-3" style="display:none;"></p>
+    </div>
+    </div>
+
+    <script>
+       function entrar() {
+    const usuario = document.getElementById("user").value;
+    const password = document.getElementById("pass").value;
+    const errorDiv = document.getElementById("error");
+
+    fetch("/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ usuario, password })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+    sessionStorage.setItem("logeado", "true");
+    sessionStorage.setItem("usuario_actual", usuario); // ¡Esto es vital para admin.html!
+    window.location.href = "index.html";
+        } else {
+            // Si data.message no existe, mostrará un error genérico
+            errorDiv.innerText = data.message || "Error desconocido en el servidor";
+            errorDiv.style.display = "block";
+        }
+    })
+    .catch(err => {
+        errorDiv.innerText = "No se pudo conectar con el servidor.";
+        errorDiv.style.display = "block";
+    });
+}
+       
+// Detectar tecla Enter en el login
+document.addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') {
+        entrar();
+    }
+});
+
+
+    </script>
+</body>
+</html>

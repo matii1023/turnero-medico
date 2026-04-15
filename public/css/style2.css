@@ -1,0 +1,396 @@
+.btn-plastic-eel {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 24px;
+    border: none;
+    cursor: pointer;
+    overflow: hidden;
+    user-select: none;
+    font-family: 'Inter', sans-serif; /* Usamos la fuente profesional */
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    transition: all 0.3s ease;
+    border-radius: 8px; /* Bordes redondeados para el efecto "plástico" */
+    gap: 10px; /* Espacio entre texto e icono */
+    text-decoration: none !important;
+    
+    /* Gradiente médico-tecnológico: base profunda con brillo azul */
+    background: linear-gradient(135deg, #223a66 0%, #1a2d52 100%);
+    box-shadow: 0 4px 12px rgba(65, 105, 225, 0.2);
+}
+
+/* --- ESTILO DE LOS PUNTOS DE ANIMACIÓN --- */
+.dots-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1; /* Se mueven detrás del texto */
+}
+
+.dotdot {
+    width: 5px;
+    height: 5px;
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    transform: translateY(25px); /* Posición inicial (fuera de vista) */
+    transition: transform 0.5s ease;
+}
+
+/* Icono blanco */
+.btn-plastic-eel svg {
+    stroke: #ffffff;
+}
+
+/* --- EFECTOS HOVER Y ACTIVE --- */
+
+/* Escala leve y brillo al pasar el mouse */
+.btn-plastic-eel:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 18px rgba(65, 105, 225, 0.3);
+}
+
+/* Lógica de la animación de puntos */
+.btn-plastic-eel:hover .dots-container {
+    opacity: 1;
+}
+
+/* Animación con retrasos para un efecto fluido */
+.btn-plastic-eel:hover .dot1 { transition-delay: 0s; transform: translateY(-25px); }
+.btn-plastic-eel:hover .dot2 { transition-delay: 0.1s; transform: translateY(-25px); }
+.btn-plastic-eel:hover .dot3 { transition-delay: 0.2s; transform: translateY(-25px); }
+.btn-plastic-eel:hover .dot4 { transition-delay: 0.3s; transform: translateY(-25px); }
+.btn-plastic-eel:hover .dot5 { transition-delay: 0.4s; transform: translateY(-25px); }
+
+/* Efecto al presionar (click) */
+.btn-plastic-eel:active {
+    transform: scale(0.98);
+    background: linear-gradient(135deg, #1a2d52 0%, #152445 100%);
+}
+
+/* --- SISTEMA DE INPUTS (Estilo Stingray Médico) --- */
+.input-group-custom {
+    position: relative;
+    width: 100%;
+}
+
+.input-group-custom .input {
+    font-family: 'Inter', sans-serif;
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 15px;
+    border: 2px solid #e8e8e8;
+    border-radius: 8px;
+    background-color: transparent;
+    color: #223a66; /* Azul médico para el texto que escribe el usuario */
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+    box-sizing: border-box;
+}
+
+.input-group-custom .user-label {
+    font-family: 'Inter', sans-serif;
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    font-size: 15px;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+    background-color: #ffffff; /* Tapamos la línea del borde al subir */
+    padding: 0 6px;
+}
+
+/* Efecto al pasar el mouse por encima */
+.input-group-custom .input:hover {
+    border-color: #b0c4de;
+}
+
+/* Efecto al hacer clic (Focus) o cuando ya tiene texto (Valid) */
+.input-group-custom .input:focus,
+.input-group-custom .input:valid {
+    border-color: #4169e1; /* Royalblue */
+    box-shadow: 0 0 15px rgba(65, 105, 225, 0.15); /* Brillo suave */
+}
+
+/* Animación de la etiqueta subiendo */
+.input-group-custom .input:focus ~ .user-label,
+.input-group-custom .input:valid ~ .user-label {
+    top: 0;
+    font-size: 13px;
+    color: #4169e1;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* --- BOTONES DEL HERO (INDEX PRINCIPAL) --- */
+.btn-hero {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 28px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 8px; /* Coherente con los inputs y el login */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    text-decoration: none !important;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* --- PRINCIPAL: Reservar Turno --- */
+.btn-hero-primary {
+    background: linear-gradient(135deg, #223a66 0%, #1a2d52 100%);
+    color: #ffffff !important;
+    border: none;
+    box-shadow: 0 4px 15px rgba(34, 58, 102, 0.2);
+}
+
+.btn-hero-primary:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(34, 58, 102, 0.4);
+}
+
+/* Efecto de brillo de cristal al pasar el mouse */
+.btn-hero-primary::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+    transform: skewX(-25deg);
+    transition: all 0.7s ease;
+}
+
+.btn-hero-primary:hover::after {
+    left: 200%;
+}
+
+/* --- SECUNDARIO: Ver Agenda --- */
+.btn-hero-secondary {
+    background: transparent;
+    color: #223a66 !important;
+    border: 2px solid #223a66;
+}
+
+.btn-hero-secondary:hover {
+    background: #223a66;
+    color: #ffffff !important;
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(34, 58, 102, 0.2);
+}
+
+
+.img-fondo{
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter', sans-serif;
+    
+    /* REEMPLAZA 'tu-imagen.jpg' por la ruta de tu foto en la carpeta images */
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+            url('../images/sl_021921_40900_13.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+.fondo-historia{
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter', sans-serif;
+    
+    /* REEMPLAZA 'tu-imagen.jpg' por la ruta de tu foto en la carpeta images */
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+            url('../images/sl_021921_40900_13.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+
+
+.navbar-custom {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 999;
+    background: rgba(34, 58, 102, 0.85); /* mismo tono que tu estética */
+    backdrop-filter: blur(6px);
+    height: 60px;
+    background: rgba(255,255,255,0.1);
+}
+
+/* Logo */
+.logo-nav {
+    height: 35px;
+}
+
+/* Para que el contenido no quede debajo del nav */
+.img-fondo {
+    padding-top: 70px;
+    position: relative;
+}
+
+
+.btn-hero2 {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    padding: 14px 28px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 8px; /* Coherente con los inputs y el login */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    text-decoration: none !important;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* --- PRINCIPAL: Reservar Turno --- */
+.btn-hero2-primary {
+    background: linear-gradient(135deg, #223a66 0%, #1a2d52 100%);
+    color: #ffffff !important;
+    border: none;
+    box-shadow: 0 4px 15px rgba(34, 58, 102, 0.2);
+}
+
+.btn-hero2-primary:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(34, 58, 102, 0.4);
+}
+
+/* Efecto de brillo de cristal al pasar el mouse */
+.btn-hero2-primary::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+    transform: skewX(-25deg);
+    transition: all 0.7s ease;
+}
+
+.btn-hero2-primary:hover::after {
+    left: 200%;
+}
+
+/* --- SECUNDARIO: Ver Agenda --- */
+.btn-hero2-secondary {
+    background: transparent;
+    color: #223a66 !important;
+    border: 2px solid #223a66;
+}
+
+.btn-hero2-secondary:hover {
+    background: #223a66;
+    color: #ffffff !important;
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(34, 58, 102, 0.2);
+}
+
+
+.btn-hero3 {
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    place-items: center;
+    margin: 0 auto;
+    padding: 14px 28px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 8px; /* Coherente con los inputs y el login */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    text-decoration: none !important;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* --- PRINCIPAL: Reservar Turno --- */
+.btn-hero3-primary {
+    background: linear-gradient(135deg, #223a66 0%, #1a2d52 100%);
+    color: #ffffff !important;
+    border: none;
+    box-shadow: 0 4px 15px rgba(34, 58, 102, 0.2);
+}
+
+.btn-hero3-primary:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(34, 58, 102, 0.4);
+}
+
+/* Efecto de brillo de cristal al pasar el mouse */
+.btn-hero3-primary::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+    transform: skewX(-25deg);
+    transition: all 0.7s ease;
+}
+
+.btn-hero3-primary:hover::after {
+    left: 200%;
+}
+
+/* --- SECUNDARIO: Ver Agenda --- */
+.btn-hero3-secondary {
+    background: transparent;
+    color: #223a66 !important;
+    border: 2px solid #223a66;
+}
+
+.btn-hero3-secondary:hover {
+    background: #223a66;
+    color: #ffffff !important;
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(34, 58, 102, 0.2);
+}
+
+.top-buttons {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 1000;
+}

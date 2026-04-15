@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Historia Clínica Digital</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="plugins/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="plugins/icofont/icofont.min.css">
+    <!-- SweetAlert2 CSS y JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style2.css">
+    <style>
+        :root { --primary-color: #223a66; --accent-color: #e12454; }
+        .bg-medical { background: var(--primary-color); color: white; }
+        .timeline { border-left: 3px solid #eee; padding-left: 20px; position: relative; }
+        .timeline-item { position: relative; margin-bottom: 30px; }
+        .timeline-item::before { 
+            content: ''; position: absolute; left: -29px; top: 5px; 
+            width: 15px; height: 15px; border-radius: 50%; background: var(--accent-color); 
+        }
+        .card-clinical { border: none; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .sticky-sidebar { position: sticky; top: 20px; }
+        
+        .btn-group-custom {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-sm-custom {
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-sm-custom:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-editar {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn-editar:hover {
+            background: #138496;
+        }
+        
+        .btn-imprimir {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-imprimir:hover {
+            background: #5a6268;
+        }
+        
+        .badge-fecha {
+            background: var(--accent-color);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            margin-left: 10px;
+        }
+
+        /* Estilos personalizados para SweetAlert2 */
+        .swal2-popup {
+            border-radius: 20px !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+        
+        .swal2-title {
+            color: #223a66 !important;
+            font-weight: 600 !important;
+        }
+        
+        .swal2-confirm.btn-main,
+        .swal2-confirm.btn-primary {
+            background: #223a66 !important;
+            color: white !important;
+            border: none !important;
+            padding: 10px 25px !important;
+            border-radius: 8px !important;
+            font-weight: 500 !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .swal2-confirm.btn-main:hover,
+        .swal2-confirm.btn-primary:hover {
+            background: #e12454 !important;
+            transform: scale(1.02) !important;
+        }
+        
+        .swal2-cancel.btn-secondary {
+            background: #6c757d !important;
+            color: white !important;
+            border: none !important;
+            padding: 10px 25px !important;
+            border-radius: 8px !important;
+            font-weight: 500 !important;
+        }
+        
+        .swal2-cancel.btn-secondary:hover {
+            background: #5a6268 !important;
+        }
+    </style>
+</head>
+<body class="gray-bg">
+
+    <nav class="navbar navbar-expand-lg navigation mb-4">
+        <div class="container-fluid px-5">
+            <a class="navbar-brand" href="index.html">
+                <img src="images/logo.png" alt="Logo" style="max-height: 40px;">
+            </a>
+            <div class="collapse navbar-collapse" id="navbarmain">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="agenda.html">Agenda</a></li>
+                    <li class="nav-item active"><a class="nav-link" href="historia.html">Historia Clinica</a></li>
+                    <li class="nav-item"><a class="nav-link" href="gestion_historias.html">Gestion HC</a></li>
+                    <li class="nav-item"><a class="nav-link" href="pacientes.html">Pacientes</a></li>
+                    <li class="nav-item"><a class="nav-link" href="admin.html">Administracion</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-5">
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="sticky-sidebar">
+                    <div class="card card-clinical p-4 mb-4">
+                        <h4 class="mb-3">Buscar Paciente</h4>
+                        <div class="input-group">
+                            <input type="text" id="busquedaDni" class="form-control" placeholder="DNI sin puntos...">
+                            <div class="input-group-append">
+                                <button class="btn btn-main" onclick="buscarHistoria()"><i class="icofont-search"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="panelPaciente" class="card card-clinical p-4 bg-medical" style="display: none;">
+                        <h5>Ficha del Paciente</h5>
+                        <hr class="bg-white">
+                        <p class="mb-1"><strong>Nombre:</strong> <span id="infoNombre">-</span></p>
+                        <p class="mb-1"><strong>DNI:</strong> <span id="infoDni">-</span></p>
+                        <p class="mb-0"><strong>Tel:</strong> <span id="infoTel">-</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="card card-clinical p-4 mb-4">
+                    <h4 class="mb-4 text-color">Nueva Evolución Clínica</h4>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label>Médico Tratante</label>
+                            <input type="text" id="h_medico" class="form-control" placeholder="Dr/a...">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Fecha</label>
+                            <input type="date" id="h_fecha" class="form-control">
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label>Diagnóstico</label>
+                            <textarea id="h_diagnostico" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label>Tratamiento / Indicaciones</label>
+                            <textarea id="h_tratamiento" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <div class="btn-container d-flex gap-3 mt-4">
+                                <button class="btn-hero2 btn-hero2-primary" onclick="guardarHistoria()">
+                                    <i class="icofont-save"></i> Guardar Consulta
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-clinical p-4">
+                    <h4 class="mb-4">Historial de Atenciones</h4>
+                    <div id="contenedorHistoria" class="timeline">
+                        <p class="text-muted">Ingrese un DNI para ver los antecedentes.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        if (sessionStorage.getItem("logeado") !== "true") {
+            window.location.href = "login.html";
+        }
+
+        let historialCargado = [];
+        let dniActual = "";
+
+        // ========== FUNCIONES DE VALIDACIÓN ==========
+
+        function validarDNI(dni) {
+            const regex = /^\d{1,8}$/;
+            return regex.test(dni);
+        }
+
+        function validarTelefono(telefono) {
+            if (!telefono) return true;
+            const regex = /^\d{6,15}$/;
+            return regex.test(telefono);
+        }
+
+        function validarNombre(nombre) {
+            const regex = /^[a-zA-ZáéíóúñÑü\s\.]{3,100}$/;
+            return regex.test(nombre.trim());
+        }
+
+        function validarNombreMedico(nombre) {
+            if (!nombre) return false;
+            const regex = /^[a-zA-ZáéíóúñÑü\s\.]{3,100}$/;
+            return regex.test(nombre.trim());
+        }
+
+        function soloNumeros(event) {
+            const key = event.key;
+            if (!/^\d$/.test(key) && key !== 'Backspace' && key !== 'Tab' && key !== 'Delete' && key !== 'ArrowLeft' && key !== 'ArrowRight') {
+                event.preventDefault();
+            }
+        }
+
+        function formatearDNI(input) {
+            input.value = input.value.replace(/[^\d]/g, '').slice(0, 8);
+        }
+
+        // ========== FUNCIONES DE FORMATO ==========
+
+        function formatearFecha(fechaISO) {
+            if (!fechaISO) return 'N/A';
+            const parteFecha = fechaISO.split('T')[0];
+            const [anio, mes, dia] = parteFecha.split('-');
+            return `${dia}/${mes}/${anio}`;
+        }
+
+        function formatearHora(fechaISO) {
+            if (!fechaISO) return '';
+            const fecha = new Date(fechaISO);
+            const horas = fecha.getHours().toString().padStart(2, '0');
+            const minutos = fecha.getMinutes().toString().padStart(2, '0');
+            return `${horas}:${minutos}`;
+        }
+
+        function getFechaActual() {
+            const hoy = new Date();
+            const anio = hoy.getFullYear();
+            const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+            const dia = String(hoy.getDate()).padStart(2, '0');
+            return `${anio}-${mes}-${dia}`;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ========== FUNCIONES DE RENDERIZADO ==========
+
+        function renderizarTimeline(data) {
+            const contenedor = document.getElementById("contenedorHistoria");
+            contenedor.innerHTML = "";
+            
+            if (data.length === 0) {
+                contenedor.innerHTML = '<p class="text-muted">No hay historial previo para este paciente.</p>';
+                return;
+            }
+            
+            data.forEach((h, index) => {
+                const fechaFormateada = formatearFecha(h.fecha);
+                const horaFormateada = formatearHora(h.fecha);
+                
+                contenedor.innerHTML += `
+                    <div class="timeline-item">
+                        <div class="card p-3 shadow-sm border-0">
+                            <div class="d-flex justify-content-between align-items-start flex-wrap">
+                                <div class="mb-2 mb-md-0">
+                                    <h6 class="text-color mb-1">
+                                        <i class="icofont-calendar"></i> ${fechaFormateada}
+                                        ${horaFormateada ? `<span class="badge-fecha"><i class="icofont-clock"></i> ${horaFormateada} hs</span>` : ''}
+                                    </h6>
+                                    <span class="badge badge-primary"><i class="icofont-doctor"></i> Dr. ${escapeHtml(h.medico)}</span>
+                                </div>
+                                <div class="btn-group-custom">
+                                    <button class="btn-sm-custom btn-editar" onclick="irAGestionEditar(${h.id})">
+                                        <i class="icofont-edit"></i> Editar
+                                    </button>
+                                    <button class="btn-sm-custom btn-imprimir" onclick="imprimirRegistro(${index})">
+                                        <i class="icofont-print"></i> Imprimir
+                                    </button>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <strong><i class="icofont-stethoscope"></i> Diagnóstico:</strong>
+                                    <p class="mt-2 mb-0">${escapeHtml(h.diagnostico) || 'No especificado'}</p>
+                                </div>
+                                <div class="col-12">
+                                    <strong><i class="icofont-prescription"></i> Tratamiento:</strong>
+                                    <p class="mt-2 mb-0">${escapeHtml(h.tratamiento) || 'No especificado'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function irAGestionEditar(id) {
+            const dni = document.getElementById("infoDni").innerText;
+            if (dni && dni !== "-") {
+                window.location.href = `gestion_historias.html?dni=${dni}&edit=${id}`;
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Paciente no encontrado',
+                    text: 'Primero busque un paciente para editar su historia.',
+                    confirmButtonText: 'Entendido',
+                    customClass: { confirmButton: 'btn btn-main' },
+                    buttonsStyling: false
+                });
+            }
+        }
+
+        // ========== FUNCIÓN BUSCAR HISTORIA ==========
+        function buscarHistoria(dniParam) {
+            const dniBusqueda = dniParam || document.getElementById('busquedaDni').value;
+            
+            if(!dniBusqueda) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'DNI requerido',
+                    text: 'Por favor, ingrese un DNI.',
+                    confirmButtonText: 'Entendido',
+                    customClass: { confirmButton: 'btn btn-main' },
+                    buttonsStyling: false
+                });
+                return;
+            }
+            
+            if (!validarDNI(dniBusqueda)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'DNI inválido',
+                    text: 'El DNI debe contener solo números y máximo 8 dígitos',
+                    confirmButtonText: 'Corregir',
+                    customClass: { confirmButton: 'btn btn-main' },
+                    buttonsStyling: false
+                });
+                document.getElementById('busquedaDni').value = "";
+                document.getElementById('busquedaDni').focus();
+                return;
+            }
+
+            dniActual = dniBusqueda;
+
+            document.getElementById('panelPaciente').style.display = "block";
+            document.getElementById('infoDni').innerText = dniBusqueda;
+
+            Swal.fire({
+                title: 'Buscando paciente...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            fetch(`/pacientes/${dniBusqueda}`)
+                .then(res => res.json())
+                .then(paciente => {
+                    if (paciente && paciente.nombre) {
+                        document.getElementById('infoNombre').innerHTML = paciente.nombre;
+                        document.getElementById('infoTel').innerText = paciente.telefono || "Sin teléfono";
+                    } else {
+                        document.getElementById('infoNombre').innerHTML = '<input type="text" id="nombreManual" class="form-control form-control-sm" placeholder="Escriba el nombre del paciente">';
+                        document.getElementById('infoTel').innerText = "Sin teléfono";
+                    }
+                })
+                .catch(err => console.error("Error al obtener paciente:", err));
+
+            fetch(`/historia/${dniBusqueda}`)
+                .then(res => res.json())
+                .then(data => {
+                    historialCargado = data;
+                    Swal.close();
+                    
+                    if (data.length === 0) {
+                        document.getElementById('contenedorHistoria').innerHTML = "<p class='text-muted'>No hay historial previo para este paciente.</p>";
+                    } else {
+                        renderizarTimeline(data);
+                    }
+                })
+                .catch(err => {
+                    Swal.close();
+                    console.error("Error al buscar historial:", err);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Error al buscar el historial clínico',
+                        confirmButtonText: 'Entendido',
+                        customClass: { confirmButton: 'btn btn-main' },
+                        buttonsStyling: false
+                    });
+                });
+        }
+
+        // ========== FUNCIÓN GUARDAR HISTORIA ==========
+        function guardarHistoria() {
+            const dni = document.getElementById("busquedaDni").value || document.getElementById("infoDni").innerText;
+            let nombre = "";
+            
+            const inputNombre = document.getElementById("nombreManual");
+            const nombreSpan = document.getElementById("infoNombre");
+            
+            if(inputNombre) {
+                nombre = inputNombre.value;
+                if (!nombre) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Campos incompletos',
+                        text: 'Debe ingresar el nombre del paciente.',
+                        confirmButtonText: 'Entendido',
+                        customClass: { confirmButton: 'btn btn-main' },
+                        buttonsStyling: false
+                    });
+                    return;
+                }
+                if (!validarNombre(nombre)) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Nombre inválido',
+                        text: 'El nombre debe tener al menos 3 caracteres y solo letras',
+                        confirmButtonText: 'Corregir',
+                        customClass: { confirmButton: 'btn btn-main' },
+                        buttonsStyling: false
+                    });
+                    inputNombre.focus();
+                    return;
+                }
+            } else if(nombreSpan) {
+                nombre = nombreSpan.innerText;
+            }
+
+            const medico = document.getElementById("h_medico").value;
+            let fecha = document.getElementById("h_fecha").value;
+            const diagnostico = document.getElementById("h_diagnostico").value;
+            const tratamiento = document.getElementById("h_tratamiento").value;
+            const telefonoElement = document.getElementById("infoTel");
+            const telefono = telefonoElement ? telefonoElement.innerText : "";
+
+            if (!medico) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Campo incompleto',
+                    text: 'Debe completar el nombre del médico.',
+                    confirmButtonText: 'Entendido',
+                    customClass: { confirmButton: 'btn btn-main' },
+                    buttonsStyling: false
+                });
+                document.getElementById("h_medico").focus();
+                return;
+            }
+            
+            if (!validarNombreMedico(medico)) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Médico inválido',
+                    text: 'El nombre del médico debe tener al menos 3 caracteres y solo letras',
+                    confirmButtonText: 'Corregir',
+                    customClass: { confirmButton: 'btn btn-main' },
+                    buttonsStyling: false
+                });
+                document.getElementById("h_medico").focus();
+                return;
+            }
+
+            if (!validarDNI(dni)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'DNI inválido',
+                    text: 'El DNI debe contener solo números y máximo 8 dígitos',
+                    confirmButtonText: 'Corregir',
+                    customClass: { confirmButton: 'btn btn-main' },
+                    buttonsStyling: false
+                });
+                document.getElementById("busquedaDni").focus();
+                return;
+            }
+
+            if (telefono && telefono !== "Sin teléfono" && !validarTelefono(telefono)) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Teléfono inválido',
+                    text: 'El teléfono debe contener solo números (mínimo 6, máximo 15 dígitos)',
+                    confirmButtonText: 'Corregir',
+                    customClass: { confirmButton: 'btn btn-main' },
+                    buttonsStyling: false
+                });
+                return;
+            }
+
+            if (!fecha) {
+                fecha = getFechaActual();
+            }
+
+            if (!dni || !medico || !nombre) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Campos incompletos',
+                    text: 'Debe completar nombre, DNI y médico.',
+                    confirmButtonText: 'Entendido',
+                    customClass: { confirmButton: 'btn btn-main' },
+                    buttonsStyling: false
+                });
+                return;
+            }
+
+            const datos = {
+                paciente_nombre: nombre,
+                paciente_dni: dni,
+                telefono: telefono !== "Sin teléfono" ? telefono : "",
+                fecha: fecha,
+                diagnostico: diagnostico,
+                tratamiento: tratamiento,
+                medico: medico
+            };
+
+            Swal.fire({
+                title: 'Guardando evolución...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            fetch("/historia/guardar", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(datos)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Guardado!',
+                        text: 'Evolución clínica guardada correctamente',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        buscarHistoria(dni);
+                        document.getElementById("h_diagnostico").value = "";
+                        document.getElementById("h_tratamiento").value = "";
+                        document.getElementById("h_fecha").value = "";
+                        document.getElementById("h_medico").value = "";
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Error al guardar en la base de datos',
+                        confirmButtonText: 'Entendido',
+                        customClass: { confirmButton: 'btn btn-main' },
+                        buttonsStyling: false
+                    });
+                }
+            })
+            .catch(err => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error al conectar con el servidor',
+                    confirmButtonText: 'Entendido',
+                    customClass: { confirmButton: 'btn btn-main' },
+                    buttonsStyling: false
+                });
+            });
+        }
+
+        // ========== FUNCIÓN IMPRIMIR REGISTRO ==========
+        function imprimirRegistro(index) {
+            const h = historialCargado[index];
+            const fechaFormateada = formatearFecha(h.fecha);
+            const horaFormateada = formatearHora(h.fecha);
+            
+            const ventana = window.open('', '_blank');
+            ventana.document.write(`
+                <html>
+                <head>
+                    <title>Reporte Médico - ${h.paciente_nombre}</title>
+                    <link rel="stylesheet" href="plugins/bootstrap/bootstrap.min.css">
+                    <style>
+                        body { padding: 40px; font-family: Arial, sans-serif; }
+                        .header { border-bottom: 3px solid #223a66; margin-bottom: 30px; padding-bottom: 15px; text-align: center; }
+                        .header h3 { color: #223a66; margin: 0; }
+                        .header p { color: #666; margin: 5px 0 0; }
+                        .info-row { margin-bottom: 12px; }
+                        .label { font-weight: bold; width: 120px; display: inline-block; }
+                        .footer { margin-top: 80px; text-align: center; border-top: 1px solid #ccc; padding-top: 20px; font-size: 12px; color: #666; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h3>HISTORIA CLÍNICA DIGITAL</h3>
+                        <p>Consultorio Médico</p>
+                    </div>
+                    <div class="info-row"><span class="label">Paciente:</span> ${escapeHtml(h.paciente_nombre)}</div>
+                    <div class="info-row"><span class="label">DNI:</span> ${h.paciente_dni}</div>
+                    <div class="info-row"><span class="label">Fecha:</span> ${fechaFormateada} ${horaFormateada ? `- ${horaFormateada} hs` : ''}</div>
+                    <div class="info-row"><span class="label">Médico:</span> Dr. ${escapeHtml(h.medico)}</div>
+                    <hr>
+                    <h5>Diagnóstico:</h5>
+                    <p>${escapeHtml(h.diagnostico) || 'No especificado'}</p>
+                    <h5>Tratamiento:</h5>
+                    <p>${escapeHtml(h.tratamiento) || 'No especificado'}</p>
+                    <div class="footer">
+                        <p>_______________________<br>Firma y Sello del Médico</p>
+                        <p><small>Documento generado electrónicamente - ${new Date().toLocaleString()}</small></p>
+                    </div>
+                </body>
+                </html>
+            `);
+            ventana.document.close();
+            setTimeout(() => { ventana.print(); }, 500);
+        }
+
+        // ========== FUNCIÓN CARGAR MÉDICOS (AUTOCOMPLETADO) ==========
+        function cargarMedicosParaHistoria() {
+            fetch("/medicos")
+                .then(res => res.json())
+                .then(data => {
+                    const inputMedico = document.getElementById("h_medico");
+                    if (inputMedico) {
+                        let datalist = document.getElementById("listaMedicos");
+                        if (!datalist) {
+                            datalist = document.createElement("datalist");
+                            datalist.id = "listaMedicos";
+                            inputMedico.setAttribute("list", "listaMedicos");
+                            document.body.appendChild(datalist);
+                        }
+                        datalist.innerHTML = "";
+                        data.forEach(medico => {
+                            const option = document.createElement("option");
+                            option.value = medico.nombre;
+                            if (medico.especialidad) {
+                                option.textContent = `${medico.nombre} - ${medico.especialidad}`;
+                            }
+                            datalist.appendChild(option);
+                        });
+                    }
+                });
+        }
+
+        // ========== VALIDACIÓN DEL CAMPO DNI EN EL BUSCADOR ==========
+        function configurarValidacionesBusqueda() {
+            const dniInput = document.getElementById("busquedaDni");
+            if (dniInput) {
+                dniInput.addEventListener("keypress", soloNumeros);
+                dniInput.addEventListener("input", function() {
+                    formatearDNI(this);
+                });
+                dniInput.addEventListener("blur", function() {
+                    if (this.value && !validarDNI(this.value)) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'DNI inválido',
+                            text: 'El DNI debe contener solo números y máximo 8 dígitos',
+                            confirmButtonText: 'Entendido',
+                            customClass: { confirmButton: 'btn btn-main' },
+                            buttonsStyling: false
+                        });
+                        this.value = "";
+                        this.focus();
+                    }
+                });
+            }
+        }
+
+        function configurarBuscarConEnter() {
+            const dniInput = document.getElementById("busquedaDni");
+            if (dniInput) {
+                dniInput.addEventListener("keypress", function(e) {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        buscarHistoria();
+                    }
+                });
+            }
+        }
+
+        // ========== INICIALIZAR AL CARGAR LA PÁGINA ==========
+        window.onload = () => {
+            cargarMedicosParaHistoria();
+            configurarValidacionesBusqueda();
+            configurarBuscarConEnter(); 
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const dniDesdeUrl = urlParams.get('dni');
+            if (dniDesdeUrl) {
+                document.getElementById('busquedaDni').value = dniDesdeUrl;
+                buscarHistoria(dniDesdeUrl);
+            }
+        };
+    </script>
+
+    <style>  
+        .btn {
+            display: inline-block;
+            font-size: 14px;
+            font-size: 0.8125rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 0.75rem 2rem;
+            font-family: "Exo", sans-serif;
+            text-transform: uppercase;
+            border-radius: 5px;
+            border: 2px solid transparent;
+            transition: all 0.35s ease;
+        }
+        .btn-main {
+            background: #223a66;
+            color: #fff;
+            border-color: #223a66;
+            text-align: center
+        }
+        .btn-main:hover {
+            background: #e12454;
+            border-color: #e12454;
+            color: #fff;
+        }
+        .btn-main-2 {
+            background: #e12454;
+            color: #fff;
+            border-color: #e12454;
+        }
+        .btn-main-2:hover {
+            background: #223a66;
+            color: #fff;
+            border-color: #223a66;
+        }
+        
+        .btn-group-custom {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-sm-custom {
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-sm-custom:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-editar {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn-editar:hover {
+            background: #138496;
+        }
+        
+        .btn-imprimir {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-imprimir:hover {
+            background: #5a6268;
+        }
+        
+        .badge-fecha {
+            background: #e12454;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            margin-left: 10px;
+            display: inline-block;
+        }
+    </style>
+</body>
+</html>

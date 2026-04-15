@@ -1,0 +1,76 @@
+function enviarWhatsAppBusiness() {
+    if (!datos) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Error',
+            text: 'No hay datos del turno',
+            confirmButtonText: 'Entendido'
+        });
+        return;
+    }
+    
+    // MÚLTIPLES FUENTES PARA OBTENER EL ID
+    let turnoId = null;
+    
+    // Fuente 1: datos.id (si está en el objeto turno)
+    if (datos.id) {
+        turnoId = datos.id;
+        console.log("✅ ID encontrado en datos.id:", turnoId);
+    }
+    // Fuente 2: localStorage específico
+    else if (localStorage.getItem("turnoId")) {
+        turnoId = localStorage.getItem("turnoId");
+        console.log("✅ ID encontrado en localStorage turnoId:", turnoId);
+    }
+    // Fuente 3: intentar extraer del localStorage turno (por si acaso)
+    else {
+        const turnoRaw = localStorage.getItem("turno");
+        if (turnoRaw) {
+            try {
+                const turnoObj = JSON.parse(turnoRaw);
+                if (turnoObj.id) {
+                    turnoId = turnoObj.id;
+                    console.log("✅ ID extraído del objeto turno en localStorage:", turnoId);
+                }
+            } catch(e) {
+                console.error("Error parseando turno:", e);
+            }
+        }
+    }
+    
+    console.log("🔍 ID final obtenido:", turnoId);
+    console.log("📦 Datos completos:", datos);
+    
+    // Verificar si es un ID temporal
+    if (turnoId && turnoId.toString().startsWith("temp_")) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'ID temporal detectado',
+            text: 'El turno tiene un ID temporal. La función de WhatsApp no funcionará correctamente. Puede enviar el mensaje manualmente desde la agenda.',
+            confirmButtonText: 'Entendido'
+        });
+        return;
+    }
+    
+    if (!turnoId) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'ID de turno no encontrado',
+            html: `No se pudo identificar el turno.<br><br>
+                   <strong>Datos disponibles:</strong><br>
+                   Nombre: ${datos.nombre || 'N/A'}<br>
+                   DNI: ${datos.dni || 'N/A'}<br>
+                   Fecha: ${datos.fecha || 'N/A'}<br><br>
+                   Puede enviar el mensaje manualmente desde la agenda.`,
+            confirmButtonText: 'Ir a agenda'
+        }).then(() => {
+            window.location.href = 'agenda.html';
+        });
+        return;
+    }
+    
+    Swal.fire({
+        title: 'Enviando mensaje...',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
