@@ -1,46 +1,58 @@
 const express = require("express");
-const { Pool } = require("pg"); // Quédate solo con esta
+const { Pool } = require("pg");
 const bodyParser = require("body-parser");
 const fs = require("fs");
 const axios = require('axios');
 require('dotenv').config();
-
-const app = express();
 const path = require('path');
 const { exec } = require('child_process');
 
+const app = express();
+
 // --- CONFIGURACIÓN DE CONEXIÓN ---
-// Soporta tanto local como Railway/Supabase
-
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://postgres:Emanuel01112@localhost:5432/Consultorio',
-  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
-  max: 20,
-  idleTimeoutMillis: 30000
+    connectionString: process.env.DATABASE_URL || 'postgresql://postgres:Emanuel01112@localhost:5432/Consultorio',
+    ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
+    max: 20,
+    idleTimeoutMillis: 30000
 });
-
-// Log para saber a qué BD nos conectamos (útil para depuración)
-console.log(`📊 Conectando a base de datos: ${process.env.DATABASE_URL ? 'REMOTA (Railway/Supabase)' : 'LOCAL (PostgreSQL)'}`);
 
 app.use(bodyParser.json());
-
-// Servir archivos estáticos desde la raíz
-app.use(express.static(__dirname));
-
-// Servir carpetas específicas
-app.use('/css', express.static(path.join(__dirname, 'css')));
-app.use('/plugins', express.static(path.join(__dirname, 'plugins')));
-app.use('/images', express.static(path.join(__dirname, 'images')));
-
-// Middleware para logs (opcional, ayuda a depurar)
-app.use((req, res, next) => {
-    console.log(`📁 Solicitado: ${req.url}`);
-    next();
-});
 
 // Configuración para asegurar UTF-8 en todas las respuestas
 app.use((req, res, next) => {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    next();
+});
+
+// ========== SERVIR ARCHIVOS ESTÁTICOS (CORREGIDO) ==========
+// Servir archivos desde la raíz del proyecto
+app.use(express.static(__dirname));
+
+// Servir carpeta CSS
+app.use('/css', express.static(path.join(__dirname, 'css'), {
+    setHeaders: (res) => {
+        res.setHeader('Content-Type', 'text/css; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    }
+}));
+
+// Servir carpeta plugins
+app.use('/plugins', express.static(path.join(__dirname, 'plugins'), {
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.css')) {
+            res.setHeader('Content-Type', 'text/css; charset=utf-8');
+        }
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    }
+}));
+
+// Servir carpeta images
+app.use('/images', express.static(path.join(__dirname, 'images')));
+
+// Log para depuración
+app.use((req, res, next) => {
+    console.log(`📁 Solicitado: ${req.url}`);
     next();
 });
 
