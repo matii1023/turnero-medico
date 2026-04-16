@@ -24,6 +24,20 @@ console.log(`📊 Conectando a base de datos: ${process.env.DATABASE_URL ? 'REMO
 
 app.use(bodyParser.json());
 
+// Servir archivos estáticos desde la raíz
+app.use(express.static(__dirname));
+
+// Servir carpetas específicas
+app.use('/css', express.static(path.join(__dirname, 'css')));
+app.use('/plugins', express.static(path.join(__dirname, 'plugins')));
+app.use('/images', express.static(path.join(__dirname, 'images')));
+
+// Middleware para logs (opcional, ayuda a depurar)
+app.use((req, res, next) => {
+    console.log(`📁 Solicitado: ${req.url}`);
+    next();
+});
+
 // Configuración para asegurar UTF-8 en todas las respuestas
 app.use((req, res, next) => {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
